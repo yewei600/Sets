@@ -10,5 +10,116 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".game.GameFragment" />
+        tools:context=".game.GameFragment">
+
+        <GridLayout
+            android:id="@+id/grid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:rowCount="3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.77">
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s2"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s3"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s4"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s5"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s6"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s7"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s8"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+            <com.ericwei.sets.model.ShapeView
+                android:id="@+id/s9"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="10dp"
+                android:background="@color/cardview_dark_background" />
+
+        </GridLayout>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="0"
+            android:textAlignment="center"
+            android:textSize="60sp"
+            app:layout_constraintBottom_toTopOf="@+id/redrawBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/redrawBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Redraw squares"
+            app:layout_constraintBottom_toTopOf="@+id/grid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/timeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
