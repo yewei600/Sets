@@ -14,5 +14,12 @@ enum class FillType(val num: Int) {
     FILL(0), EMPTY(1), LINES(2)
 }
 
+enum class DrawState {
+    WAITING, REDRAW, SELECT, UNSELECT
+}
 
-data class Shape(val shapeType: ShapeType, val colorType: ColorType, val fillType: FillType)
+
+data class Shape(
+    val shapeType: ShapeType, val colorType: ColorType, val fillType: FillType,
+    val drawState: DrawState
+)

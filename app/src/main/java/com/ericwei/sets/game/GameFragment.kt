@@ -59,14 +59,18 @@ class GameFragment : Fragment(), GameContract.View {
     override fun onResume() {
         super.onResume()
         mGamePresenter.startTimer()
-        mGamePresenter.getGameShapes()
+        mGamePresenter.getGameShapes(Array(9) { it })
     }
 
-    override fun onGameShapesReceived(gameArray: ArrayList<Shape>) {
-        for (i in 0..8) {
-            mShapeArray[i].setShapeAttributes(gameArray[i])
+    override fun onUpdateShapes(updateShapes: Map<Int, Shape?>) {
+        mGridLayout.isEnabled = false
+        for (key in updateShapes.keys) {
+            updateShapes[key]?.let { shape ->
+                mShapeArray[key].mShape = shape
+                mShapeArray[key].invalidate()
+            }
         }
-        mGridLayout.invalidate()
+        mGridLayout.isEnabled = true
     }
 
     override fun onCurrentSetsReceived(curSets: ArrayList<Array<Int>>) {

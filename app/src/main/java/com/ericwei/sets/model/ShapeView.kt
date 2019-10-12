@@ -9,14 +9,7 @@ import android.view.animation.LinearInterpolator
 
 class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    enum class DrawState {
-        WAITING, REDRAW, SELECT, UNSELECT
-    }
-
-    lateinit var mShape: ShapeType
-    lateinit var mColor: ColorType
-    lateinit var mFill: FillType
-
+    var mShape: Shape? = null
     private var mDrawState = DrawState.WAITING
     private var mPaint = Paint()
     private var mFramePaint = Paint()
@@ -44,58 +37,52 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
         canvas.drawColor(Color.WHITE)
 
-        if (mDrawState == DrawState.REDRAW) {
-            mColor = ColorType.values().random()
-            mShape = ShapeType.values().random()
-            mFill = FillType.values().random()
-        }
+        mShape?.let {
+            var coords = intArrayOf(0, 0)
+            getLocationOnScreen(coords)
+            val cX = (width / 2).toFloat()
+            val cY = (height / 2).toFloat()
+            val radius = (width / 3).toFloat()
 
-        var coords = intArrayOf(0, 0)
-        getLocationOnScreen(coords)
-        val cX = (width / 2).toFloat()
-        val cY = (height / 2).toFloat()
-        val radius = (width / 3).toFloat()
-
-        mPath.reset()
-        when (mShape) {
-            ShapeType.CIRCLE -> getCirclePath(cX, cY, radius, mPath)
-            ShapeType.SQUARE -> getRectPath(
-                cX - radius,
-                cY - radius,
-                cX + radius,
-                cY + radius,
-                mPath
-            )
-            ShapeType.TRIANGLE -> getTrianglePath((cX - radius), (cY + radius), radius, mPath)
-        }
-
-        when (mFill) {
-            FillType.FILL -> mPaint.style = Paint.Style.FILL
-            FillType.EMPTY -> mPaint.style = Paint.Style.STROKE
-            FillType.LINES -> {
-                mPaint.style = Paint.Style.STROKE
-                drawLinesThrough(mPath)
+            mPath.reset()
+            when (mShape?.shapeType) {
+                ShapeType.CIRCLE -> getCirclePath(cX, cY, radius, mPath)
+                ShapeType.SQUARE -> getRectPath(
+                    cX - radius,
+                    cY - radius,
+                    cX + radius,
+                    cY + radius,
+                    mPath
+                )
+                ShapeType.TRIANGLE -> getTrianglePath((cX - radius), (cY + radius), radius, mPath)
             }
-        }
-        mPaint.color = mColor.color
 
-        canvas.drawPath(mPath, mPaint)
+            when (mShape?.fillType) {
+                FillType.FILL -> mPaint.style = Paint.Style.FILL
+                FillType.EMPTY -> mPaint.style = Paint.Style.STROKE
+                FillType.LINES -> {
+                    mPaint.style = Paint.Style.STROKE
+                    drawLinesThrough(mPath)
+                }
+            }
+            mPaint.color = mShape?.colorType!!.color
+            canvas.drawPath(mPath, mPaint)
 
-        canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
-    }
-
-    fun animateUserSelection(isAdding: Boolean) {
-        //do some animation to show User selected this Shape
-        val startVal = mFramePaint.strokeWidth
-        val endVal = if (startVal == 5f) 40f else 5f
-        ObjectAnimator.ofFloat(this, "frameWidth", startVal, endVal).apply {
-            duration = 3000
-            interpolator = LinearInterpolator()
-            start()
+            canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
         }
     }
 
-    //attempt 2 just simply change width
+//    fun animateUserSelection(isAdding: Boolean) {
+//        //do some animation to show User selected this Shape
+//        val startVal = mFramePaint.strokeWidth
+//        val endVal = if (startVal == 5f) 40f else 5f
+//        ObjectAnimator.ofFloat(this, "frameWidth", startVal, endVal).apply {
+//            duration = 3000
+//            interpolator = LinearInterpolator()
+//            start()
+//        }
+//    }
+
     fun redrawShape(state: DrawState) {
         mDrawState = state
         var curWidth = mFramePaint.strokeWidth
@@ -109,12 +96,6 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         mFramePaint.strokeWidth = curWidth
         invalidate()
-    }
-
-    fun setShapeAttributes(shape: Shape) {
-        mShape = shape.shapeType
-        mColor = shape.colorType
-        mFill = shape.fillType
     }
 
     private fun drawLinesThrough(path: Path) {
@@ -172,5 +153,4 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         path.lineTo(p3.x.toFloat(), p3.y.toFloat())
         path.close()
     }
-
 }
