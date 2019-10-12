@@ -10,14 +10,14 @@ import android.view.animation.LinearInterpolator
 class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     enum class DrawState {
-        REDRAW, SELECT, UNSELECT
+        WAITING, REDRAW, SELECT, UNSELECT
     }
 
-    private lateinit var mShape: ShapeType
-    private lateinit var mColor: ColorType
-    private lateinit var mFill: FillType
+    lateinit var mShape: ShapeType
+    lateinit var mColor: ColorType
+    lateinit var mFill: FillType
 
-    private var mDrawState = DrawState.REDRAW
+    private var mDrawState = DrawState.WAITING
     private var mPaint = Paint()
     private var mFramePaint = Paint()
     private var mPath = Path()
@@ -109,6 +109,12 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         mFramePaint.strokeWidth = curWidth
         invalidate()
+    }
+
+    fun setShapeAttributes(shape: Shape) {
+        mShape = shape.shapeType
+        mColor = shape.colorType
+        mFill = shape.fillType
     }
 
     private fun drawLinesThrough(path: Path) {

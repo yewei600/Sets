@@ -1,17 +1,17 @@
 package com.ericwei.sets.game
 
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import com.ericwei.sets.model.ColorType
-import com.ericwei.sets.model.FillType
-import com.ericwei.sets.model.Shape
-import com.ericwei.sets.model.ShapeType
+import com.ericwei.sets.model.*
+import com.ericwei.sets.model.ShapeView.*
 
 class GamePresenter(private var gameView: GameContract.View) : GameContract.Presenter {
 
-    private val tag = "GamePresenter"
+    private val TAG = "GamePresenter"
     private var mGameArray: ArrayList<Shape> = arrayListOf()
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
+    private var mUserSelected: MutableSet<ShapeView> = mutableSetOf()
 
     override fun startTimer() {
         Log.d("GamePresenter", "here")
@@ -36,8 +36,9 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         mCurrentSets.forEach {
             setsStr += "(${it[0] + 1} ${it[1] + 1} ${it[2] + 1})\n"
         }
-        Log.d(tag, setsStr)
+        Log.d(TAG, setsStr)
         gameView.onGameShapesReceived(mGameArray)
+        gameView.onCurrentSetsReceived(mCurrentSets)
     }
 
     private fun findNumSets() {
@@ -52,9 +53,44 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         }
     }
 
-    override fun checkUserPlay() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun shapeClicked(shapeView: ShapeView) {
+        if (mUserSelected.contains(shapeView)) {
+            shapeView.redrawShape(DrawState.UNSELECT)
+            mUserSelected.remove(shapeView)
+
+        } else {
+            shapeView.redrawShape(DrawState.SELECT)
+            mUserSelected.add(shapeView)
+            if (mUserSelected.size == 3) {
+                Handler().postDelayed({
+                    if (checkUserSelectedIsSet()) {
+                        //Toast.makeText(this, "SET FOUND!!!", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "SET FOUND!!!")
+                        mUserSelected.forEach { shape ->
+                            shape.redrawShape(DrawState.REDRAW)
+                        }
+                    } else {
+                        //Toast.makeText(this, "not a set :(", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "not a set :(")
+                        mUserSelected.forEach { shape ->
+                            shape.redrawShape(DrawState.UNSELECT)
+                        }
+                    }
+                    mUserSelected.clear()
+                }, 300)
+            }
+        }
     }
+
+
+    private fun checkUserSelectedIsSet(): Boolean {
+        var userSet = arrayListOf<Shape>()
+        mUserSelected.forEach {
+            userSet.add(Shape(it.mShape, it.mColor, it.mFill))
+        }
+        return checkIsSet(userSet[0], userSet[1], userSet[2])
+    }
+
 
     override fun checkIsSet(s1: Shape, s2: Shape, s3: Shape): Boolean {
         val setArray = arrayOf(s1, s2, s3)

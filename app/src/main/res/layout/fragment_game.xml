@@ -29,63 +29,72 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="0" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s2"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="1" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s3"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="2" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s4"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="3" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s5"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="4" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s6"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="5" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s7"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="6" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s8"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="7" />
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s9"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background" />
+                android:background="@color/cardview_dark_background"
+                android:tag="8" />
 
         </GridLayout>
 
@@ -120,6 +129,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/curSetsTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="23dp"
+            android:layout_marginEnd="4dp"
+            android:text="TextView"
+            app:layout_constraintEnd_toEndOf="@+id/timeTv"
+            app:layout_constraintTop_toBottomOf="@+id/grid" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,6 +1,7 @@
 package com.ericwei.sets.game
 
 import com.ericwei.sets.model.Shape
+import com.ericwei.sets.model.ShapeView
 
 
 class GameContract {
@@ -10,7 +11,7 @@ class GameContract {
 
         fun getGameShapes()
 
-        fun checkUserPlay()
+        fun shapeClicked(shapeView: ShapeView)
 
         fun checkIsSet(s1: Shape, s2: Shape, s3: Shape): Boolean
     }
@@ -18,6 +19,8 @@ class GameContract {
     interface View {
 
         fun onGameShapesReceived(gameArray: ArrayList<Shape>)
+
+        fun onCurrentSetsReceived(curSets: ArrayList<Array<Int>>)
 
         fun updateShapes()
 
