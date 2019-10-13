@@ -1,16 +1,14 @@
 package com.ericwei.sets.model
 
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
-import android.view.animation.LinearInterpolator
 
 class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     var mShape: Shape? = null
-    private var mDrawState = DrawState.WAITING
     private var mPaint = Paint()
     private var mFramePaint = Paint()
     private var mPath = Path()
@@ -65,10 +63,25 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     drawLinesThrough(mPath)
                 }
             }
+            var curWidth = 5f
+            when (mShape?.drawState) {
+                DrawState.REDRAW ->
+                    curWidth = 5f
+                DrawState.UNSELECT ->
+                    curWidth = 5f
+                DrawState.SELECT ->
+                    curWidth = 40f
+            }
+            mFramePaint.strokeWidth = curWidth
+
             mPaint.color = mShape?.colorType!!.color
             canvas.drawPath(mPath, mPaint)
 
             canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
+            Log.d(
+                "ShapeView",
+                "finished onDraw() shape tag=" + this.tag + "   shape=" + mShape?.shapeType + "  color=" + mShape?.colorType + "  fill=" + mShape?.fillType
+            )
         }
     }
 
@@ -82,21 +95,6 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 //            start()
 //        }
 //    }
-
-    fun redrawShape(state: DrawState) {
-        mDrawState = state
-        var curWidth = mFramePaint.strokeWidth
-        when (state) {
-            DrawState.REDRAW ->
-                curWidth = 5f
-            DrawState.UNSELECT ->
-                curWidth = 5f
-            DrawState.SELECT ->
-                curWidth = 40f
-        }
-        mFramePaint.strokeWidth = curWidth
-        invalidate()
-    }
 
     private fun drawLinesThrough(path: Path) {
         val pathMeasure = PathMeasure()

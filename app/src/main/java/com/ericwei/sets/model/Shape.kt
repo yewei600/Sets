@@ -15,11 +15,11 @@ enum class FillType(val num: Int) {
 }
 
 enum class DrawState {
-    WAITING, REDRAW, SELECT, UNSELECT
+    REDRAW, SELECT, UNSELECT
 }
 
 
 data class Shape(
     val shapeType: ShapeType, val colorType: ColorType, val fillType: FillType,
-    val drawState: DrawState
+    var drawState: DrawState
 )

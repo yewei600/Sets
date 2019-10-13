@@ -3,7 +3,6 @@ package com.ericwei.sets.game
 import android.os.Handler
 import android.util.Log
 import com.ericwei.sets.model.*
-import com.ericwei.sets.model.ShapeView.*
 
 class GamePresenter(private var gameView: GameContract.View) : GameContract.Presenter {
 
@@ -16,31 +15,49 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         Log.d("GamePresenter", "here")
     }
 
-    override fun getGameShapes(shapeIds: Array<Int>) {
-        while (mCurrentSets.size < 2) {
-            //mGameArray.clear()
-            mCurrentSets.clear()
-            for (i in shapeIds) {
-                mGameArray[i] = Shape(
-                    ShapeType.values().random(),
-                    ColorType.values().random(),
-                    FillType.values().random(),
-                    DrawState.REDRAW
-                )
+    override fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState) {
+        when (drawState) {
+            DrawState.REDRAW -> {
+                Log.d(TAG, "redraw")
+                mCurrentSets.clear()
+                while (mCurrentSets.size < 2) {
+                    for (i in shapeIds) {
+                        mGameArray[i] = Shape(
+                            ShapeType.values().random(),
+                            ColorType.values().random(),
+                            FillType.values().random(),
+                            drawState
+                        )
+                        Log.d(
+                            TAG,
+                            "get new  tag=" + i.toString() + "   shape=" + mGameArray[i]?.shapeType + "  color=" + mGameArray[i]?.colorType + "  fill=" + mGameArray[i]?.fillType
+                        )
+                    }
+                    findNumSets()
+                }
             }
-            findNumSets()
+            DrawState.SELECT -> {
+                Log.d(TAG, "select")
+                for (i in shapeIds) {
+                    mGameArray[i]!!.drawState = DrawState.SELECT
+                }
+            }
+            DrawState.UNSELECT -> {
+                Log.d(TAG, "unselect")
+                for (i in shapeIds) {
+                    mGameArray[i]!!.drawState = DrawState.UNSELECT
+                }
+            }
         }
-        var setsStr = ""
-        mCurrentSets.forEach {
-            setsStr += "(${it[0] + 1} ${it[1] + 1} ${it[2] + 1})\n"
-        }
-        Log.d(TAG, setsStr)
+
         val updateMap = mutableMapOf<Int, Shape?>()
         for (id in shapeIds) {
-            updateMap.put(id,mGameArray[id])
+            updateMap[id] = mGameArray[id]
         }
-        gameView.onUpdateShapes(updateMap)
-        gameView.onCurrentSetsReceived(mCurrentSets)
+        gameView.onShapesUpdateReceived(updateMap)
+        if (drawState == DrawState.REDRAW) {
+            gameView.onCurrentSetsReceived(mCurrentSets)
+        }
     }
 
     private fun findNumSets() {
@@ -56,27 +73,29 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
     }
 
     override fun shapeClicked(shapeView: ShapeView) {
+        val viewId = shapeView.tag.toString().toInt()
         if (mUserSelected.contains(shapeView)) {
-            shapeView.redrawShape(DrawState.UNSELECT)
+            updateGameShapes(arrayOf(viewId), DrawState.UNSELECT)
             mUserSelected.remove(shapeView)
 
         } else {
-            shapeView.redrawShape(DrawState.SELECT)
+            updateGameShapes(arrayOf(viewId), DrawState.SELECT)
             mUserSelected.add(shapeView)
             if (mUserSelected.size == 3) {
+                val userSet = Array(3) { 0 }
+                mUserSelected.forEachIndexed { i, shapeView ->
+                    userSet[i] = shapeView.tag.toString().toInt()
+                }
                 Handler().postDelayed({
                     if (checkUserSelectedIsSet()) {
                         //Toast.makeText(this, "SET FOUND!!!", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "SET FOUND!!!")
-//                        mUserSelected.forEach { shape ->
-//                            shape.redrawShape(DrawState.REDRAW)
-//                        }
+                        updateGameShapes(userSet, DrawState.REDRAW)
                     } else {
                         //Toast.makeText(this, "not a set :(", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "not a set :(")
-//                        mUserSelected.forEach { shape ->
-//                            shape.redrawShape(DrawState.UNSELECT)
-//                        }
+                        updateGameShapes(userSet, DrawState.UNSELECT)
+
                     }
                     mUserSelected.clear()
                 }, 300)

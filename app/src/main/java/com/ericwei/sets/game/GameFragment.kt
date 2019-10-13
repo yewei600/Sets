@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.TextView
-import androidx.core.view.children
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.ericwei.sets.R
 import com.ericwei.sets.databinding.FragmentGameBinding
+import com.ericwei.sets.model.DrawState
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
 
@@ -59,10 +59,10 @@ class GameFragment : Fragment(), GameContract.View {
     override fun onResume() {
         super.onResume()
         mGamePresenter.startTimer()
-        mGamePresenter.getGameShapes(Array(9) { it })
+        mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)
     }
 
-    override fun onUpdateShapes(updateShapes: Map<Int, Shape?>) {
+    override fun onShapesUpdateReceived(updateShapes: Map<Int, Shape?>) {
         mGridLayout.isEnabled = false
         for (key in updateShapes.keys) {
             updateShapes[key]?.let { shape ->
