@@ -7,9 +7,12 @@ import com.ericwei.sets.model.*
 class GamePresenter(private var gameView: GameContract.View) : GameContract.Presenter {
 
     private val TAG = "GamePresenter"
+    private var mScore = 0
     private var mGameArray = arrayOfNulls<Shape>(9)
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
     private var mUserSelected: MutableSet<ShapeView> = mutableSetOf()
+    private val ALL_SAME_SCORE = 10
+    private val ALL_DIFF_SCORE = 20
 
     override fun startTimer() {
         Log.d("GamePresenter", "here")
@@ -19,8 +22,8 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         when (drawState) {
             DrawState.REDRAW -> {
                 Log.d(TAG, "redraw")
-                mCurrentSets.clear()
-                while (mCurrentSets.size < 2) {
+                do {
+                    mCurrentSets.clear()
                     for (i in shapeIds) {
                         mGameArray[i] = Shape(
                             ShapeType.values().random(),
@@ -34,7 +37,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
                         )
                     }
                     findNumSets()
-                }
+                } while (mCurrentSets.size < 2)
             }
             DrawState.SELECT -> {
                 Log.d(TAG, "select")
@@ -103,13 +106,27 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         }
     }
 
-
     private fun checkUserSelectedIsSet(): Boolean {
         var userSet = arrayListOf<Shape?>()
         mUserSelected.forEach {
             userSet.add(it.mShape)
         }
-        return checkIsSet(userSet[0], userSet[1], userSet[2])
+        val isSet = checkIsSet(userSet[0], userSet[1], userSet[2])
+        if (isSet) {
+            val shapes = mutableSetOf<ShapeType?>()
+            val colors = mutableSetOf<ColorType?>()
+            val fills = mutableSetOf<FillType?>()
+            userSet.forEach { shape ->
+                shapes.add(shape?.shapeType)
+                colors.add(shape?.colorType)
+                fills.add(shape?.fillType)
+            }
+            mScore += if (shapes.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
+            mScore += if (colors.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
+            mScore += if (fills.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
+            gameView.onScoreUpdateReceived(mScore)
+        }
+        return isSet
     }
 
 

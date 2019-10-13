@@ -23,6 +23,8 @@ class GameContract {
 
         fun onCurrentSetsReceived(curSets: ArrayList<Array<Int>>)
 
+        fun onScoreUpdateReceived(score: Int)
+
         fun updateShapes()
 
         fun onTimerExpired()
