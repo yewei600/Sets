@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".customize.CustomizeFragment">
+
+    <GridLayout
+        android:id="@+id/customizeGrid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="3"
+        app:layout_constraintBottom_toTopOf="@+id/skipBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chooseTv">
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="0" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s2"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="1" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s3"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="2" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s4"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="3" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s5"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="4" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s6"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="5" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s7"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="6" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s8"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="7" />
+
+        <com.ericwei.sets.model.ShapeView
+            android:id="@+id/s9"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:background="@color/cardview_dark_background"
+            android:tag="8" />
+
+    </GridLayout>
+
+    <TextView
+        android:id="@+id/chooseTv"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/customizeGrid"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Choose 3 shapes" />
+
+    <Button
+        android:id="@+id/skipBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/customizeGrid"
+        tools:text="Skip to color" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

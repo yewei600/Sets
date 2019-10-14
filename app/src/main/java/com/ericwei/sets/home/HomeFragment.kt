@@ -27,6 +27,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         )
 
         binding.playBtn.setOnClickListener(this)
+        binding.customBtn.setOnClickListener(this)
 
         return binding.root
     }
@@ -36,6 +37,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
         when (v!!.id) {
             R.id.playBtn ->
                 navController.navigate(R.id.action_homeFragment_to_gameFragment)
+            R.id.customBtn ->
+                navController.navigate(R.id.action_homeFragment_to_customizeFragment)
 
         }
 

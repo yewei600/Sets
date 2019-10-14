@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_homeFragment_to_gameFragment"
             app:destination="@id/gameFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_customizeFragment"
+            app:destination="@id/customizeFragment" />
     </fragment>
     <fragment
         android:id="@+id/gameFragment"
@@ -28,4 +31,9 @@
         android:name="com.ericwei.sets.gamesummary.SummaryFragment"
         android:label="fragment_summary"
         tools:layout="@layout/fragment_summary" />
+    <fragment
+        android:id="@+id/customizeFragment"
+        android:name="com.ericwei.sets.customize.CustomizeFragment"
+        android:label="fragment_customize"
+        tools:layout="@layout/fragment_customize" />
 </navigation>
