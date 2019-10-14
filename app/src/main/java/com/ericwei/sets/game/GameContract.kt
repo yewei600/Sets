@@ -15,6 +15,10 @@ class GameContract {
         fun shapeClicked(shapeView: ShapeView)
 
         fun checkIsSet(s1: Shape?, s2: Shape?, s3: Shape?): Boolean
+
+        fun getHint()
+
+        fun onHintShapeViewReceived(shapeView: ShapeView)
     }
 
     interface View {
@@ -28,6 +32,8 @@ class GameContract {
         fun updateShapes()
 
         fun onTimerExpired()
+
+        fun getHintShapeView(shapeId: Int)
     }
 
 }

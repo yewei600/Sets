@@ -37,7 +37,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
                         )
                     }
                     findNumSets()
-                } while (mCurrentSets.size < 2)
+                } while (mCurrentSets.size < 2 || mCurrentSets.size > 4)
             }
             DrawState.SELECT -> {
                 Log.d(TAG, "select")
@@ -61,6 +61,24 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         if (drawState == DrawState.REDRAW) {
             gameView.onCurrentSetsReceived(mCurrentSets)
         }
+    }
+
+    override fun getHint() {
+        if (mUserSelected.size > 0) {
+            val clearSelected = Array(mUserSelected.size) { 0 }
+            mUserSelected.forEachIndexed { i, shapeView ->
+                clearSelected[i] = shapeView.tag.toString().toInt()
+            }
+            mUserSelected.clear()
+            updateGameShapes(clearSelected, DrawState.UNSELECT)
+        }
+        val randomSetElement = mCurrentSets.random().random()
+        updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
+        gameView.getHintShapeView(randomSetElement)
+    }
+
+    override fun onHintShapeViewReceived(shapeView: ShapeView) {
+        mUserSelected.add(shapeView)
     }
 
     private fun findNumSets() {

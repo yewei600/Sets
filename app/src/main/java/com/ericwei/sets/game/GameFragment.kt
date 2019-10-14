@@ -5,6 +5,7 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
@@ -24,6 +25,7 @@ class GameFragment : Fragment(), GameContract.View {
     private lateinit var mScoreTv: TextView
     private lateinit var mCurSetsTv: TextView
     private lateinit var mTimerTv: TextView
+    private lateinit var mHintBtn: Button
 
     private val mTimer = object : CountDownTimer(60000 * 2, 1000) {
         override fun onTick(millisUntilFinished: Long) {
@@ -57,6 +59,7 @@ class GameFragment : Fragment(), GameContract.View {
         mScoreTv = binding.scoreTv
         mCurSetsTv = binding.curSetsTv
         mTimerTv = binding.timeTv
+        mHintBtn = binding.hintBtn
         mShapeArray = arrayOf(
             binding.s1,
             binding.s2,
@@ -68,6 +71,9 @@ class GameFragment : Fragment(), GameContract.View {
             binding.s8,
             binding.s9
         )
+        mHintBtn.setOnClickListener {
+            mGamePresenter.getHint()
+        }
         mShapeArray.forEach { shape ->
             shape.setOnClickListener {
                 mGamePresenter.shapeClicked(shape)
@@ -102,6 +108,10 @@ class GameFragment : Fragment(), GameContract.View {
 
     override fun onScoreUpdateReceived(score: Int) {
         mScoreTv.text = score.toString()
+    }
+
+    override fun getHintShapeView(shapeId: Int) {
+        mGamePresenter.onHintShapeViewReceived(mShapeArray[shapeId])
     }
 
     override fun updateShapes() {
