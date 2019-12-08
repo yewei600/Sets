@@ -34,6 +34,8 @@ class GameContract {
         fun onTimerExpired()
 
         fun getHintShapeView(shapeId: Int)
+
+        fun playSound(soundId: GameFragment.SOUNDS)
     }
 
 }

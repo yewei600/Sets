@@ -2,6 +2,7 @@ package com.ericwei.sets.game
 
 import android.os.Handler
 import android.util.Log
+import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.*
 
 class GamePresenter(private var gameView: GameContract.View) : GameContract.Presenter {
@@ -75,6 +76,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         val randomSetElement = mCurrentSets.random().random()
         updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
         gameView.getHintShapeView(randomSetElement)
+        gameView.playSound(CLICK_ON)
     }
 
     override fun onHintShapeViewReceived(shapeView: ShapeView) {
@@ -98,10 +100,11 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         if (mUserSelected.contains(shapeView)) {
             updateGameShapes(arrayOf(viewId), DrawState.UNSELECT)
             mUserSelected.remove(shapeView)
-
+            gameView.playSound(CLICK_OFF)
         } else {
             updateGameShapes(arrayOf(viewId), DrawState.SELECT)
             mUserSelected.add(shapeView)
+            gameView.playSound(CLICK_ON)
             if (mUserSelected.size == 3) {
                 val userSet = Array(3) { 0 }
                 mUserSelected.forEachIndexed { i, shapeView ->
@@ -112,14 +115,15 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
                         //Toast.makeText(this, "SET FOUND!!!", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "SET FOUND!!!")
                         updateGameShapes(userSet, DrawState.REDRAW)
+                        gameView.playSound(SET)
                     } else {
                         //Toast.makeText(this, "not a set :(", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "not a set :(")
                         updateGameShapes(userSet, DrawState.UNSELECT)
-
+                        gameView.playSound(CLICK_OFF)
                     }
                     mUserSelected.clear()
-                }, 300)
+                }, 350)
             }
         }
     }
