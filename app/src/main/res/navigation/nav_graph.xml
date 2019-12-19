@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_homeFragment_to_customizeFragment"
             app:destination="@id/customizeFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_rulesFragment"
+            app:destination="@id/rulesFragment" />
     </fragment>
     <fragment
         android:id="@+id/gameFragment"
@@ -36,4 +39,9 @@
         android:name="com.ericwei.sets.customize.CustomizeFragment"
         android:label="fragment_customize"
         tools:layout="@layout/fragment_customize" />
+    <fragment
+        android:id="@+id/rulesFragment"
+        android:name="com.ericwei.sets.rules.RulesFragment"
+        android:label="fragment_rules"
+        tools:layout="@layout/fragment_rules" />
 </navigation>
