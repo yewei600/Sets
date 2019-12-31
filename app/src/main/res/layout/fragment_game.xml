@@ -29,7 +29,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="0" />
 
             <com.ericwei.sets.model.ShapeView
@@ -37,7 +36,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="1" />
 
             <com.ericwei.sets.model.ShapeView
@@ -45,7 +43,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="2" />
 
             <com.ericwei.sets.model.ShapeView
@@ -53,7 +50,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="3" />
 
             <com.ericwei.sets.model.ShapeView
@@ -61,7 +57,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="4" />
 
             <com.ericwei.sets.model.ShapeView
@@ -69,7 +64,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="5" />
 
             <com.ericwei.sets.model.ShapeView
@@ -77,7 +71,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="6" />
 
             <com.ericwei.sets.model.ShapeView
@@ -85,7 +78,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="7" />
 
             <com.ericwei.sets.model.ShapeView
@@ -93,7 +85,6 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:background="@color/cardview_dark_background"
                 android:tag="8" />
 
         </GridLayout>

@@ -9,6 +9,7 @@ import android.view.View
 class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     var mShape: Shape? = null
+    var mDrawFrame: Boolean = true
     private var mPaint = Paint()
     private var mFramePaint = Paint()
     private var mPath = Path()
@@ -33,7 +34,6 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(Color.WHITE)
 
         mShape?.let {
             var coords = intArrayOf(0, 0)
@@ -77,7 +77,9 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             mPaint.color = mShape?.colorType!!.color
             canvas.drawPath(mPath, mPaint)
 
-            canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
+            if (mDrawFrame) {
+                canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
+            }
             Log.d(
                 "ShapeView",
                 "finished onDraw() shape tag=" + this.tag + "   shape=" + mShape?.shapeType + "  color=" + mShape?.colorType + "  fill=" + mShape?.fillType
