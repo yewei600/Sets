@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -42,8 +43,10 @@ class GameFragment : Fragment(), GameContract.View {
         }
 
         override fun onFinish() {
-            this@GameFragment.findNavController()
-                .navigate(R.id.action_gameFragment_to_summaryFragment)
+            findNavController().navigate(
+                R.id.action_gameFragment_to_gameOverDialogFragment,
+                bundleOf(getString(R.string.game_score) to mScoreTv.text)
+            )
         }
     }
 

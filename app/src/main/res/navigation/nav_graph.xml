@@ -9,13 +9,10 @@
         android:id="@+id/homeFragment"
         android:name="com.ericwei.sets.home.HomeFragment"
         android:label="fragment_home"
-        tools:layout="@layout/fragment_home" >
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_gameFragment"
             app:destination="@id/gameFragment" />
-        <action
-            android:id="@+id/action_homeFragment_to_customizeFragment"
-            app:destination="@id/customizeFragment" />
         <action
             android:id="@+id/action_homeFragment_to_rulesFragment"
             app:destination="@id/rulesFragment" />
@@ -24,24 +21,28 @@
         android:id="@+id/gameFragment"
         android:name="com.ericwei.sets.game.GameFragment"
         android:label="fragment_game"
-        tools:layout="@layout/fragment_game" >
+        tools:layout="@layout/fragment_game">
         <action
-            android:id="@+id/action_gameFragment_to_summaryFragment"
-            app:destination="@id/summaryFragment" />
+            android:id="@+id/action_gameFragment_to_gameOverDialogFragment"
+            app:destination="@id/gameOverDialogFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/summaryFragment"
-        android:name="com.ericwei.sets.gamesummary.SummaryFragment"
-        android:label="fragment_summary"
-        tools:layout="@layout/fragment_summary" />
-    <fragment
-        android:id="@+id/customizeFragment"
-        android:name="com.ericwei.sets.customize.CustomizeFragment"
-        android:label="fragment_customize"
-        tools:layout="@layout/fragment_customize" />
     <fragment
         android:id="@+id/rulesFragment"
         android:name="com.ericwei.sets.rules.RulesFragment"
         android:label="fragment_rules"
         tools:layout="@layout/fragment_rules" />
+    <dialog
+        android:id="@+id/gameOverDialogFragment"
+        android:name="com.ericwei.sets.gameover.GameOverDialogFragment"
+        android:label="fragment_game_over">
+        <action
+            android:id="@+id/action_gameOverDialogFragment_to_gameFragment"
+            app:destination="@id/gameFragment"
+            app:popUpTo="@id/homeFragment" />
+        <action
+            android:id="@+id/action_gameOverDialogFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </dialog>
 </navigation>
