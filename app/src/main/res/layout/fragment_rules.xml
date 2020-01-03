@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="false"
     tools:context=".rules.RulesFragment">
 
     <LinearLayout
@@ -29,6 +30,26 @@
             android:layout_marginRight="10dp"
             android:fontFamily="serif-monospace"
             android:text="@string/game_rules_content"
+            android:textSize="25dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30dp"
+            android:fontFamily="serif-monospace"
+            android:text="@string/scoring"
+            android:textSize="30dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="10dp"
+            android:fontFamily="serif-monospace"
+            android:text="@string/scoring_content"
             android:textSize="25dp"
             android:textStyle="bold" />
 

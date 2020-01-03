@@ -9,6 +9,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
 
     private val TAG = "GamePresenter"
     private var mScore = 0
+    private var mNumSetsFound = 0
     private var mGameArray = arrayOfNulls<Shape>(9)
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
     private var mUserSelected: MutableSet<ShapeView> = mutableSetOf()
@@ -60,7 +61,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
         }
         gameView.onShapesUpdateReceived(updateMap)
         if (drawState == DrawState.REDRAW) {
-            gameView.onCurrentSetsReceived(mCurrentSets)
+            gameView.onNumPossibleSetsReceived(mCurrentSets.size)
         }
     }
 
@@ -147,6 +148,7 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
             mScore += if (colors.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
             mScore += if (fills.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
             gameView.onScoreUpdateReceived(mScore)
+            gameView.onNumSetsFoundReceived(++mNumSetsFound)
         }
         return isSet
     }

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
@@ -20,16 +21,20 @@ import com.ericwei.sets.model.DrawState
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
 
-class GameFragment : Fragment(), GameContract.View {
+class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
     private lateinit var mGamePresenter: GameContract.Presenter
     private lateinit var mGridLayout: GridLayout
     private lateinit var mShapeArray: Array<ShapeView>
     private lateinit var mScoreTv: TextView
-    private lateinit var mCurSetsTv: TextView
+    private lateinit var mNumSetsFoundTv: TextView
     private lateinit var mTimerTv: TextView
+    private lateinit var mCurSetsTv: TextView
+    private lateinit var mCloseBtn: ImageButton
     private lateinit var mHintBtn: Button
+    private lateinit var mSoundBtn: ImageButton
     private lateinit var mBtnSoundPlayers: Array<MediaPlayer>
+    private var mSoundOn: Boolean = true
 
     enum class SOUNDS(val id: Int) {
         CLICK_ON(0), CLICK_OFF(1), SET(2)
@@ -67,9 +72,12 @@ class GameFragment : Fragment(), GameContract.View {
     private fun assignUi(binding: FragmentGameBinding) {
         mGridLayout = binding.grid
         mScoreTv = binding.scoreTv
-        mCurSetsTv = binding.curSetsTv
+        mNumSetsFoundTv = binding.numSetsFoundTv
         mTimerTv = binding.timeTv
+        mCurSetsTv = binding.curSetsTv
+        mCloseBtn = binding.closeBtn
         mHintBtn = binding.hintBtn
+        mSoundBtn = binding.soundBtn
         mShapeArray = arrayOf(
             binding.s1,
             binding.s2,
@@ -81,12 +89,26 @@ class GameFragment : Fragment(), GameContract.View {
             binding.s8,
             binding.s9
         )
-        mHintBtn.setOnClickListener {
-            mGamePresenter.getHint()
-        }
+        mCloseBtn.setOnClickListener(this)
+        mHintBtn.setOnClickListener(this)
+        mSoundBtn.setOnClickListener(this)
         mShapeArray.forEach { shape ->
             shape.setOnClickListener {
                 mGamePresenter.shapeClicked(shape)
+            }
+        }
+    }
+
+    override fun onClick(v: View) {
+        when (v.id) {
+            R.id.closeBtn -> findNavController().navigate(R.id.action_gameFragment_to_homeFragment)
+            R.id.hintBtn -> mGamePresenter.getHint()
+            R.id.soundBtn -> {
+                mSoundOn = !mSoundOn
+                mSoundBtn.setImageResource(
+                    if (mSoundOn) R.drawable.ic_volume_on_24px else
+                        R.drawable.ic_volume_off_24px
+                )
             }
         }
     }
@@ -121,16 +143,16 @@ class GameFragment : Fragment(), GameContract.View {
         mGridLayout.isEnabled = true
     }
 
-    override fun onCurrentSetsReceived(curSets: ArrayList<Array<Int>>) {
-        var str = ""
-        curSets.forEach { set ->
-            str += "(${set[0] + 1} ${set[1] + 1} ${set[2] + 1})  "
-        }
-        mCurSetsTv.text = str
+    override fun onNumPossibleSetsReceived(numSets: Int) {
+        mCurSetsTv.text = "$numSets sets available"
     }
 
     override fun onScoreUpdateReceived(score: Int) {
         mScoreTv.text = score.toString()
+    }
+
+    override fun onNumSetsFoundReceived(numSets: Int) {
+        mNumSetsFoundTv.text = if (numSets > 1) "$numSets sets" else "$numSets set"
     }
 
     override fun getHintShapeView(shapeId: Int) {
@@ -138,18 +160,20 @@ class GameFragment : Fragment(), GameContract.View {
     }
 
     override fun playSound(soundId: SOUNDS) {
-        when (soundId) {
-            CLICK_ON -> {
-                mBtnSoundPlayers[CLICK_ON.id].seekTo(0)
-                mBtnSoundPlayers[CLICK_ON.id].start()
-            }
-            CLICK_OFF -> {
-                mBtnSoundPlayers[CLICK_OFF.id].seekTo(0)
-                mBtnSoundPlayers[CLICK_OFF.id].start()
-            }
-            SET -> {
-                mBtnSoundPlayers[SET.id].seekTo(0)
-                mBtnSoundPlayers[SET.id].start()
+        if (mSoundOn) {
+            when (soundId) {
+                CLICK_ON -> {
+                    mBtnSoundPlayers[CLICK_ON.id].seekTo(0)
+                    mBtnSoundPlayers[CLICK_ON.id].start()
+                }
+                CLICK_OFF -> {
+                    mBtnSoundPlayers[CLICK_OFF.id].seekTo(0)
+                    mBtnSoundPlayers[CLICK_OFF.id].start()
+                }
+                SET -> {
+                    mBtnSoundPlayers[SET.id].seekTo(0)
+                    mBtnSoundPlayers[SET.id].start()
+                }
             }
         }
     }

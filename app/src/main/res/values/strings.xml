@@ -3,6 +3,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="game_rules_content">The objective of the game is to identify \'sets\' of 3 cards. Each card is unique in its 3 features: <u>color</u>, <u>shape</u>, and <u>shading</u>. A \'set\' consists of 3 cards on which each feature is either <u>the same</u> on all 3 cards, <u>or different</u> on all 3 cards.</string>
     <string name="how_to_play"><u>How to play</u></string>
+    <string name="scoring"><u>Scoring</u></string>
+    <string name="scoring_content">The player gets <u>10 points</u> for each feature that\'s all the same and <u>20 points</u> for each feature that\'s all different. The score for each \'set\' is the sum of points for all 3 features.</string>
     <string name="valid_sets"><u>Valid Sets</u></string>
     <string name="invalid_sets"><u>Invalid Sets</u></string>
     <string name="game_score">game score</string>

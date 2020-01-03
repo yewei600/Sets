@@ -25,9 +25,11 @@ class GameContract {
 
         fun onShapesUpdateReceived(updateShapes: Map<Int, Shape?>)
 
-        fun onCurrentSetsReceived(curSets: ArrayList<Array<Int>>)
+        fun onNumPossibleSetsReceived(numSets: Int)
 
         fun onScoreUpdateReceived(score: Int)
+
+        fun onNumSetsFoundReceived(numSets: Int)
 
         fun updateShapes()
 
