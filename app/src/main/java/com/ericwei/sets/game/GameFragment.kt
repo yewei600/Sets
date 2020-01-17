@@ -6,7 +6,6 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.TextView
@@ -31,7 +30,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     private lateinit var mTimerTv: TextView
     private lateinit var mCurSetsTv: TextView
     private lateinit var mCloseBtn: ImageButton
-    private lateinit var mHintBtn: Button
+    private lateinit var mHintBtn: ImageButton
     private lateinit var mSoundBtn: ImageButton
     private lateinit var mBtnSoundPlayers: Array<MediaPlayer>
     private var mSoundOn: Boolean = true

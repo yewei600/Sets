@@ -22,7 +22,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/scoreTv"
-            app:layout_constraintVertical_bias="0.4">
+            app:layout_constraintVertical_bias="0.32">
 
             <com.ericwei.sets.model.ShapeView
                 android:id="@+id/s1"
@@ -94,6 +94,7 @@
             android:layout_width="wrap_content"
             android:layout_height="100dp"
             android:layout_marginStart="196dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="149dp"
             android:fontFamily="serif-monospace"
             android:text="0"
@@ -105,27 +106,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
+        <ImageButton
             android:id="@+id/hintBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="67dp"
-            android:layout_marginBottom="16dp"
-            android:text="Hint"
+            style="?android:borderlessButtonStyle"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="256dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitXY"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/soundBtn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/soundBtn"
+            app:srcCompat="@drawable/ic_help_outline_24px" />
 
         <TextView
             android:id="@+id/timeTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="40dp"
-            android:layout_marginBottom="53dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="12dp"
             android:fontFamily="serif-monospace"
             android:textSize="30dp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/grid"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/grid"
+            tools:layout_editor_absoluteX="310dp"
             tools:text="1:59" />
 
         <TextView
@@ -148,40 +154,48 @@
             android:id="@+id/numSetsFoundTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="53dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="12dp"
             android:fontFamily="serif-monospace"
             android:text="0 set"
             android:textSize="30dp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/grid"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/grid"
+            app:layout_constraintTop_toTopOf="@id/timeTv"
+            tools:layout_editor_absoluteX="26dp"
             tools:text="0 set" />
 
         <ImageView
             android:id="@+id/timeLapseIv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="13dp"
+            android:layout_marginEnd="8dp"
+            android:paddingTop="5dp"
+            app:layout_constraintBottom_toBottomOf="@id/timeTv"
             app:layout_constraintEnd_toStartOf="@+id/timeTv"
             app:layout_constraintTop_toTopOf="@+id/timeTv"
             app:srcCompat="@drawable/ic_timelapse_24px" />
 
         <ImageButton
             android:id="@+id/closeBtn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="17dp"
+            style="?android:borderlessButtonStyle"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_close_24px" />
 
         <ImageButton
             android:id="@+id/soundBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/hintBtn"
+            style="?android:borderlessButtonStyle"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/hintBtn"
             app:srcCompat="@drawable/ic_volume_on_24px" />
 
