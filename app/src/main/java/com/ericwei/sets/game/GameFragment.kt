@@ -114,7 +114,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         mBtnSoundPlayers = arrayOf(
             MediaPlayer.create(context, R.raw.click_on),
             MediaPlayer.create(context, R.raw.click_off),
-            MediaPlayer.create(context, R.raw.beep)
+            MediaPlayer.create(context, R.raw.point)
         )
     }
 
