@@ -8,4 +8,5 @@
     <string name="valid_sets"><u>Valid Sets</u></string>
     <string name="invalid_sets"><u>Invalid Sets</u></string>
     <string name="game_score">game score</string>
+    <string name="time_remain">time_remain</string>
 </resources>

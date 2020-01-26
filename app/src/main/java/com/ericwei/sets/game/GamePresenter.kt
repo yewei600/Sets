@@ -1,11 +1,17 @@
 package com.ericwei.sets.game
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
+import android.preference.PreferenceManager
 import android.util.Log
+import com.ericwei.sets.MainActivity
+import com.ericwei.sets.R
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.*
 
-class GamePresenter(private var gameView: GameContract.View) : GameContract.Presenter {
+class GamePresenter(private var gameView: GameContract.View, private val context: Context) :
+    GameContract.Presenter {
 
     private val TAG = "GamePresenter"
     private var mScore = 0
@@ -13,6 +19,8 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
     private var mGameArray = arrayOfNulls<Shape>(9)
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
     private var mUserSelected: MutableSet<ShapeView> = mutableSetOf()
+    private var mSharedPrefs: SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(context)
     private val ALL_SAME_SCORE = 10
     private val ALL_DIFF_SCORE = 20
 
@@ -170,4 +178,19 @@ class GamePresenter(private var gameView: GameContract.View) : GameContract.Pres
                 (fills.size == 1 || fills.size == 3)
     }
 
+    override fun saveTimeRemaining(remainTime: Long) {
+        with(mSharedPrefs.edit()) {
+            putLong(context.getString(R.string.time_remain), remainTime)
+            apply()
+        }
+    }
+
+    override fun loadGameTime() {
+        gameView.startCountDownTimer(
+            mSharedPrefs.getLong(
+                context.getString(R.string.time_remain),
+                MainActivity.FULL_TIME
+            )
+        )
+    }
 }

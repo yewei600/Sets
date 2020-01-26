@@ -13,6 +13,7 @@ import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.ericwei.sets.MainActivity.Companion.FULL_TIME
 import com.ericwei.sets.R
 import com.ericwei.sets.databinding.FragmentGameBinding
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
@@ -33,25 +34,13 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     private lateinit var mHintBtn: ImageButton
     private lateinit var mSoundBtn: ImageButton
     private lateinit var mBtnSoundPlayers: Array<MediaPlayer>
+    private lateinit var mTimer: CountDownTimer
+    private var mRemainTime: Long? = null
     private var mSoundOn: Boolean = true
+    private var mGameInProgress: Boolean = false
 
     enum class SOUNDS(val id: Int) {
         CLICK_ON(0), CLICK_OFF(1), SET(2)
-    }
-
-    private val mTimer = object : CountDownTimer(60000 * 2, 1000) {
-        override fun onTick(millisUntilFinished: Long) {
-            val minutes = (millisUntilFinished / 1000) / 60
-            val seconds = (millisUntilFinished / 1000) % 60
-            mTimerTv.text = "$minutes:$seconds"
-        }
-
-        override fun onFinish() {
-            findNavController().navigate(
-                R.id.action_gameFragment_to_gameOverDialogFragment,
-                bundleOf(getString(R.string.game_score) to mScoreTv.text)
-            )
-        }
     }
 
     override fun onCreateView(
@@ -62,7 +51,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         val binding: FragmentGameBinding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_game, container, false
         )
-        mGamePresenter = GamePresenter(this)
+        mGamePresenter = GamePresenter(this, context!!)
         assignUi(binding)
 
         return binding.root
@@ -100,7 +89,11 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.closeBtn -> findNavController().navigate(R.id.action_gameFragment_to_homeFragment)
+            R.id.closeBtn -> {
+                mGameInProgress = false
+                mRemainTime = null
+                findNavController().navigate(R.id.action_gameFragment_to_homeFragment)
+            }
             R.id.hintBtn -> mGamePresenter.getHint()
             R.id.soundBtn -> {
                 mSoundOn = !mSoundOn
@@ -114,13 +107,15 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-        mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)
+        if (!mGameInProgress) {
+            mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)
+        }
+        mGamePresenter.loadGameTime()
         mBtnSoundPlayers = arrayOf(
             MediaPlayer.create(context, R.raw.click_on),
             MediaPlayer.create(context, R.raw.click_off),
             MediaPlayer.create(context, R.raw.beep)
         )
-        mTimer.start()
     }
 
     override fun onPause() {
@@ -128,7 +123,14 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         mBtnSoundPlayers.forEach {
             it.release()
         }
+        mGameInProgress = true
+        mGamePresenter.saveTimeRemaining(if (mRemainTime != null) mRemainTime!! else FULL_TIME)
         mTimer.cancel()
+    }
+
+    override fun onDestroy() {
+        mGamePresenter.saveTimeRemaining(FULL_TIME)
+        super.onDestroy()
     }
 
     override fun onShapesUpdateReceived(updateShapes: Map<Int, Shape?>) {
@@ -177,11 +179,29 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         }
     }
 
-    override fun updateShapes() {
+    override fun startCountDownTimer(timeMillis: Long) {
+        mTimer = object : CountDownTimer(timeMillis, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                mRemainTime = millisUntilFinished
+                val minutes = (millisUntilFinished / 1000) / 60
+                val seconds = (millisUntilFinished / 1000) % 60
+                if (seconds < 10) {
+                    mTimerTv.text = "$minutes:0$seconds"
+                } else {
+                    mTimerTv.text = "$minutes:$seconds"
+                }
 
-    }
+            }
 
-    override fun onTimerExpired() {
-
+            override fun onFinish() {
+                mGamePresenter.saveTimeRemaining(FULL_TIME)
+                mGameInProgress = false
+                findNavController().navigate(
+                    R.id.action_gameFragment_to_gameOverDialogFragment,
+                    bundleOf(getString(R.string.game_score) to mScoreTv.text)
+                )
+            }
+        }
+        mTimer.start()
     }
 }

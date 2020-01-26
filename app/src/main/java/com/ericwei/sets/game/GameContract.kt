@@ -19,6 +19,10 @@ class GameContract {
         fun getHint()
 
         fun onHintShapeViewReceived(shapeView: ShapeView)
+
+        fun saveTimeRemaining(remainTime: Long)
+
+        fun loadGameTime()
     }
 
     interface View {
@@ -31,13 +35,11 @@ class GameContract {
 
         fun onNumSetsFoundReceived(numSets: Int)
 
-        fun updateShapes()
-
-        fun onTimerExpired()
-
         fun getHintShapeView(shapeId: Int)
 
         fun playSound(soundId: GameFragment.SOUNDS)
+
+        fun startCountDownTimer(timeMillis: Long)
     }
 
 }

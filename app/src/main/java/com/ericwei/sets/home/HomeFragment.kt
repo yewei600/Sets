@@ -55,8 +55,6 @@ class HomeFragment : Fragment(), HomeContract.View, View.OnClickListener {
         when (v!!.id) {
             R.id.playBtn ->
                 navController.navigate(R.id.action_homeFragment_to_gameFragment)
-//            R.id.customBtn ->
-//                navController.navigate(R.id.action_homeFragment_to_customizeFragment)
             R.id.rulesBtn ->
                 navController.navigate(R.id.action_homeFragment_to_rulesFragment)
         }
