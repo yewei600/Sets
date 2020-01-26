@@ -40,6 +40,8 @@ class GameContract {
         fun playSound(soundId: GameFragment.SOUNDS)
 
         fun startCountDownTimer(timeMillis: Long)
+
+        fun updateGridClickStatus(isClickable: Boolean)
     }
 
 }

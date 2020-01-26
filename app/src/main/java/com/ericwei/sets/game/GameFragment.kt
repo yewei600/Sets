@@ -105,6 +105,12 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         }
     }
 
+    override fun updateGridClickStatus(isClickable: Boolean) {
+        mShapeArray.forEach { shape ->
+            shape.isClickable = isClickable
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         if (!mGameInProgress) {
@@ -134,14 +140,17 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     }
 
     override fun onShapesUpdateReceived(updateShapes: Map<Int, Shape?>) {
-        mGridLayout.isEnabled = false
-        for (key in updateShapes.keys) {
-            updateShapes[key]?.let { shape ->
-                mShapeArray[key].mShape = shape
-                mShapeArray[key].invalidate()
+        var selectedCnt = 0
+        mShapeArray.forEachIndexed { idx, shapeView ->
+            if (idx in updateShapes.keys) {
+                shapeView.mShape = updateShapes[idx]
+                shapeView.invalidate()
+            }
+            if (shapeView.mShape!!.drawState == DrawState.SELECT) {
+                selectedCnt++
             }
         }
-        mGridLayout.isEnabled = true
+        updateGridClickStatus(isClickable = selectedCnt < 3)
     }
 
     override fun onNumPossibleSetsReceived(numSets: Int) {
