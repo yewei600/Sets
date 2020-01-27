@@ -20,6 +20,7 @@ import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.DrawState
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
+import kotlinx.coroutines.*
 
 class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
@@ -35,6 +36,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     private lateinit var mSoundBtn: ImageButton
     private lateinit var mBtnSoundPlayers: Array<MediaPlayer>
     private lateinit var mTimer: CountDownTimer
+    private lateinit var mCoroutineScope: CoroutineScope
     private var mRemainTime: Long? = null
     private var mSoundOn: Boolean = true
     private var mGameInProgress: Boolean = false
@@ -51,7 +53,8 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         val binding: FragmentGameBinding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_game, container, false
         )
-        mGamePresenter = GamePresenter(this, context!!)
+        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
+        mGamePresenter = GamePresenter(this, context!!, mCoroutineScope)
         assignUi(binding)
 
         return binding.root
@@ -82,7 +85,9 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         mSoundBtn.setOnClickListener(this)
         mShapeArray.forEach { shape ->
             shape.setOnClickListener {
-                mGamePresenter.shapeClicked(shape)
+                mCoroutineScope.launch {
+                    mGamePresenter.shapeClicked(shape)
+                }
             }
         }
     }
@@ -94,7 +99,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
                 mRemainTime = null
                 findNavController().navigate(R.id.action_gameFragment_to_homeFragment)
             }
-            R.id.hintBtn -> mGamePresenter.getHint()
+            R.id.hintBtn -> mCoroutineScope.launch { mGamePresenter.getHint() }
             R.id.soundBtn -> {
                 mSoundOn = !mSoundOn
                 mSoundBtn.setImageResource(
@@ -114,9 +119,13 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     override fun onResume() {
         super.onResume()
         if (!mGameInProgress) {
-            mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)
+            mCoroutineScope.launch {
+                mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)
+            }
         }
-        mGamePresenter.loadGameTime()
+        mCoroutineScope.launch {
+            mGamePresenter.loadGameTime()
+        }
         mBtnSoundPlayers = arrayOf(
             MediaPlayer.create(context, R.raw.click_on),
             MediaPlayer.create(context, R.raw.click_off),
@@ -130,12 +139,14 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
             it.release()
         }
         mGameInProgress = true
-        mGamePresenter.saveTimeRemaining(if (mRemainTime != null) mRemainTime!! else FULL_TIME)
+        mCoroutineScope.launch {
+            mGamePresenter.saveTimeRemaining(if (mRemainTime != null) mRemainTime!! else FULL_TIME)
+        }
         mTimer.cancel()
     }
 
     override fun onDestroy() {
-        mGamePresenter.saveTimeRemaining(FULL_TIME)
+        mCoroutineScope.cancel()
         super.onDestroy()
     }
 
@@ -166,7 +177,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     }
 
     override fun getHintShapeView(shapeId: Int) {
-        mGamePresenter.onHintShapeViewReceived(mShapeArray[shapeId])
+        mCoroutineScope.launch { mGamePresenter.onHintShapeViewReceived(mShapeArray[shapeId]) }
     }
 
     override fun playSound(soundId: SOUNDS) {
@@ -203,7 +214,9 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
             }
 
             override fun onFinish() {
-                mGamePresenter.saveTimeRemaining(FULL_TIME)
+                mCoroutineScope.launch {
+                    mGamePresenter.saveTimeRemaining(FULL_TIME)
+                }
                 mGameInProgress = false
                 findNavController().navigate(
                     R.id.action_gameFragment_to_gameOverDialogFragment,

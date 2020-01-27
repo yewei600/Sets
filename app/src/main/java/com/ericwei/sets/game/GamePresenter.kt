@@ -2,18 +2,24 @@ package com.ericwei.sets.game
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Log
 import com.ericwei.sets.MainActivity
 import com.ericwei.sets.R
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class GamePresenter(private var gameView: GameContract.View, private val context: Context) :
+class GamePresenter(
+    private var gameView: GameContract.View,
+    private val context: Context,
+    private val coroutineScope: CoroutineScope
+) :
     GameContract.Presenter {
 
-    private val TAG = "GamePresenter"
+    private val TAG = GamePresenter::class.java.simpleName
     private var mScore = 0
     private var mNumSetsFound = 0
     private var mGameArray = arrayOfNulls<Shape>(9)
@@ -24,11 +30,7 @@ class GamePresenter(private var gameView: GameContract.View, private val context
     private val ALL_SAME_SCORE = 10
     private val ALL_DIFF_SCORE = 20
 
-    override fun startTimer() {
-        Log.d("GamePresenter", "here")
-    }
-
-    override fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState) {
+    override suspend fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState) {
         when (drawState) {
             DrawState.REDRAW -> {
                 Log.d(TAG, "redraw")
@@ -73,7 +75,7 @@ class GamePresenter(private var gameView: GameContract.View, private val context
         }
     }
 
-    override fun getHint() {
+    override suspend fun getHint() {
         if (mUserSelected.size > 0) {
             val clearSelected = Array(mUserSelected.size) { 0 }
             mUserSelected.forEachIndexed { i, shapeView ->
@@ -88,11 +90,11 @@ class GamePresenter(private var gameView: GameContract.View, private val context
         gameView.playSound(CLICK_ON)
     }
 
-    override fun onHintShapeViewReceived(shapeView: ShapeView) {
+    override suspend fun onHintShapeViewReceived(shapeView: ShapeView) {
         mUserSelected.add(shapeView)
     }
 
-    private fun findNumSets() {
+    private suspend fun findNumSets() {
         for (i in 0..8) {
             for (j in i + 1..8) {
                 for (k in j + 1..8) {
@@ -104,7 +106,7 @@ class GamePresenter(private var gameView: GameContract.View, private val context
         }
     }
 
-    override fun shapeClicked(shapeView: ShapeView) {
+    override suspend fun shapeClicked(shapeView: ShapeView) {
         val viewId = shapeView.tag.toString().toInt()
         if (mUserSelected.contains(shapeView)) {
             updateGameShapes(arrayOf(viewId), DrawState.UNSELECT)
@@ -119,7 +121,8 @@ class GamePresenter(private var gameView: GameContract.View, private val context
                 mUserSelected.forEachIndexed { i, shapeView ->
                     userSet[i] = shapeView.tag.toString().toInt()
                 }
-                Handler().postDelayed({
+                coroutineScope.launch {
+                    delay(500)
                     if (checkUserSelectedIsSet()) {
                         //Toast.makeText(this, "SET FOUND!!!", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "SET FOUND!!!")
@@ -132,12 +135,12 @@ class GamePresenter(private var gameView: GameContract.View, private val context
                         gameView.playSound(CLICK_OFF)
                     }
                     mUserSelected.clear()
-                }, 350)
+                }
             }
         }
     }
 
-    private fun checkUserSelectedIsSet(): Boolean {
+    private suspend fun checkUserSelectedIsSet(): Boolean {
         var userSet = arrayListOf<Shape?>()
         mUserSelected.forEach {
             userSet.add(it.mShape)
@@ -162,7 +165,7 @@ class GamePresenter(private var gameView: GameContract.View, private val context
     }
 
 
-    override fun checkIsSet(s1: Shape?, s2: Shape?, s3: Shape?): Boolean {
+    override suspend fun checkIsSet(s1: Shape?, s2: Shape?, s3: Shape?): Boolean {
         val setArray = arrayOf(s1, s2, s3)
         val shapes = mutableSetOf<ShapeType?>()
         val colors = mutableSetOf<ColorType?>()
@@ -178,14 +181,14 @@ class GamePresenter(private var gameView: GameContract.View, private val context
                 (fills.size == 1 || fills.size == 3)
     }
 
-    override fun saveTimeRemaining(remainTime: Long) {
+    override suspend fun saveTimeRemaining(remainTime: Long) {
         with(mSharedPrefs.edit()) {
             putLong(context.getString(R.string.time_remain), remainTime)
             apply()
         }
     }
 
-    override fun loadGameTime() {
+    override suspend fun loadGameTime() {
         gameView.startCountDownTimer(
             mSharedPrefs.getLong(
                 context.getString(R.string.time_remain),

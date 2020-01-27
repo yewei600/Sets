@@ -8,21 +8,19 @@ import com.ericwei.sets.model.ShapeView
 class GameContract {
 
     interface Presenter {
-        fun startTimer()
+        suspend fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState)
 
-        fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState)
+        suspend fun shapeClicked(shapeView: ShapeView)
 
-        fun shapeClicked(shapeView: ShapeView)
+        suspend fun checkIsSet(s1: Shape?, s2: Shape?, s3: Shape?): Boolean
 
-        fun checkIsSet(s1: Shape?, s2: Shape?, s3: Shape?): Boolean
+        suspend fun getHint()
 
-        fun getHint()
+        suspend fun onHintShapeViewReceived(shapeView: ShapeView)
 
-        fun onHintShapeViewReceived(shapeView: ShapeView)
+        suspend fun saveTimeRemaining(remainTime: Long)
 
-        fun saveTimeRemaining(remainTime: Long)
-
-        fun loadGameTime()
+        suspend fun loadGameTime()
     }
 
     interface View {
