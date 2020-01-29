@@ -3,7 +3,6 @@ package com.ericwei.sets.game
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import com.ericwei.sets.MainActivity
 import com.ericwei.sets.R
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
@@ -33,7 +32,6 @@ class GamePresenter(
     override suspend fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState) {
         when (drawState) {
             DrawState.REDRAW -> {
-                Log.d(TAG, "redraw")
                 do {
                     mCurrentSets.clear()
                     for (i in shapeIds) {
@@ -43,22 +41,16 @@ class GamePresenter(
                             FillType.values().random(),
                             drawState
                         )
-                        Log.d(
-                            TAG,
-                            "get new  tag=" + i.toString() + "   shape=" + mGameArray[i]?.shapeType + "  color=" + mGameArray[i]?.colorType + "  fill=" + mGameArray[i]?.fillType
-                        )
                     }
                     findNumSets()
                 } while (mCurrentSets.size < 2 || mCurrentSets.size > 4)
             }
             DrawState.SELECT -> {
-                Log.d(TAG, "select")
                 for (i in shapeIds) {
                     mGameArray[i]!!.drawState = DrawState.SELECT
                 }
             }
             DrawState.UNSELECT -> {
-                Log.d(TAG, "unselect")
                 for (i in shapeIds) {
                     mGameArray[i]!!.drawState = DrawState.UNSELECT
                 }
@@ -124,13 +116,9 @@ class GamePresenter(
                 coroutineScope.launch {
                     delay(500)
                     if (checkUserSelectedIsSet()) {
-                        //Toast.makeText(this, "SET FOUND!!!", Toast.LENGTH_SHORT).show()
-                        Log.d(TAG, "SET FOUND!!!")
                         updateGameShapes(userSet, DrawState.REDRAW)
                         gameView.playSound(SET)
                     } else {
-                        //Toast.makeText(this, "not a set :(", Toast.LENGTH_SHORT).show()
-                        Log.d(TAG, "not a set :(")
                         updateGameShapes(userSet, DrawState.UNSELECT)
                         gameView.playSound(CLICK_OFF)
                     }

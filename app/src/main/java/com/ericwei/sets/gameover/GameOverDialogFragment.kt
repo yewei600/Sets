@@ -11,7 +11,7 @@ class GameOverDialogFragment : DialogFragment(), GameOverContract.View {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
-            AlertDialog.Builder(it).setTitle("Game Over")
+            AlertDialog.Builder(it).setTitle("Game Finished")
                 .setMessage(
                     "You have earned a score of " +
                             arguments!!.get(getString(R.string.game_score)) + " points!"

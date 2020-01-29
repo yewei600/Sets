@@ -3,7 +3,6 @@ package com.ericwei.sets.model
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 
 class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -80,23 +79,8 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             if (mDrawFrame) {
                 canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
             }
-            Log.d(
-                "ShapeView",
-                "finished onDraw() shape tag=" + this.tag + "   shape=" + mShape?.shapeType + "  color=" + mShape?.colorType + "  fill=" + mShape?.fillType
-            )
         }
     }
-
-//    fun animateUserSelection(isAdding: Boolean) {
-//        //do some animation to show User selected this Shape
-//        val startVal = mFramePaint.strokeWidth
-//        val endVal = if (startVal == 5f) 40f else 5f
-//        ObjectAnimator.ofFloat(this, "frameWidth", startVal, endVal).apply {
-//            duration = 3000
-//            interpolator = LinearInterpolator()
-//            start()
-//        }
-//    }
 
     private fun drawLinesThrough(path: Path) {
         val pathMeasure = PathMeasure()
