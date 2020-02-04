@@ -2,9 +2,15 @@ package com.ericwei.sets.rules
 
 import com.ericwei.sets.model.*
 
-class RulesPresenter(private var rulesView: RulesContract.View) : RulesContract.Presenter {
+class RulesPresenter : RulesContract.Presenter {
 
-    override fun getShapesForRulesPage() {
+    private var mRulesView: RulesContract.View? = null
+
+    override fun setView(view: RulesContract.View) {
+        mRulesView = view
+    }
+
+    override suspend fun getShapesForRulesPage() {
         val validShapes = arrayOf(
             Shape(ShapeType.TRIANGLE, ColorType.RED, FillType.EMPTY, DrawState.UNSELECT),
             Shape(ShapeType.SQUARE, ColorType.RED, FillType.FILL, DrawState.UNSELECT),
@@ -27,7 +33,7 @@ class RulesPresenter(private var rulesView: RulesContract.View) : RulesContract.
             Shape(ShapeType.TRIANGLE, ColorType.RED, FillType.EMPTY, DrawState.UNSELECT),
             Shape(ShapeType.SQUARE, ColorType.BLUE, FillType.LINES, DrawState.UNSELECT)
         )
-        rulesView.onRulesShapesReceived(validShapes, true)
-        rulesView.onRulesShapesReceived(invalidShapes, false)
+        mRulesView?.onRulesShapesReceived(validShapes, true)
+        mRulesView?.onRulesShapesReceived(invalidShapes, false)
     }
 }

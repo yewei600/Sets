@@ -5,7 +5,9 @@ import com.ericwei.sets.model.Shape
 class HomeContract {
 
     interface Presenter {
-        fun updateShapes()
+        fun setView(view: View)
+
+        suspend fun updateShapes()
     }
 
     interface View {

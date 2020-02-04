@@ -9,12 +9,17 @@ import androidx.fragment.app.Fragment
 import com.ericwei.sets.R
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class RulesFragment : Fragment(), RulesContract.View {
 
     private lateinit var mPresenter: RulesPresenter
     private lateinit var mValidShapeArray: Array<ShapeView>
     private lateinit var mInvalidShapeArray: Array<ShapeView>
+    private lateinit var mCoroutineScope: CoroutineScope
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,9 +49,12 @@ class RulesFragment : Fragment(), RulesContract.View {
             view.findViewById(R.id.ivs8),
             view.findViewById(R.id.ivs9)
         )
-
-        mPresenter = RulesPresenter(this)
-        mPresenter.getShapesForRulesPage()
+        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
+        mPresenter = RulesPresenter()
+        mPresenter.setView(this)
+        mCoroutineScope.launch {
+            mPresenter.getShapesForRulesPage()
+        }
         return view
     }
 

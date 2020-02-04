@@ -8,6 +8,8 @@ import com.ericwei.sets.model.ShapeView
 class GameContract {
 
     interface Presenter {
+        fun setView(view: View)
+
         suspend fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState)
 
         suspend fun shapeClicked(shapeView: ShapeView)

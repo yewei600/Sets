@@ -12,6 +12,10 @@ import com.ericwei.sets.R
 import com.ericwei.sets.databinding.FragmentHomeBinding
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
@@ -20,6 +24,7 @@ class HomeFragment : Fragment(), HomeContract.View, View.OnClickListener {
 
     private lateinit var mPresenter: HomeContract.Presenter
     private lateinit var mShapeArray: Array<ShapeView>
+    private lateinit var mCoroutineScope: CoroutineScope
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,8 +41,12 @@ class HomeFragment : Fragment(), HomeContract.View, View.OnClickListener {
         //binding.customBtn.setOnClickListener(this)
         binding.rulesBtn.setOnClickListener(this)
 
-        mPresenter = HomePresenter(this)
-        mPresenter.updateShapes()
+        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
+        mPresenter = HomePresenter()
+        mPresenter.setView(this)
+        mCoroutineScope.launch {
+            mPresenter.updateShapes()
+        }
         return binding.root
     }
 

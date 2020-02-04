@@ -2,11 +2,16 @@ package com.ericwei.sets.home
 
 import com.ericwei.sets.model.*
 
-class HomePresenter(private var homeView: HomeContract.View) : HomeContract.Presenter {
+class HomePresenter : HomeContract.Presenter {
 
+    private var mHomeView: HomeContract.View? = null
     private var mShapes: Array<Shape>? = null
 
-    override fun updateShapes() {
+    override fun setView(view: HomeContract.View) {
+        mHomeView = view
+    }
+
+    override suspend fun updateShapes() {
         if (mShapes.isNullOrEmpty()) {
             mShapes = arrayOf(
                 Shape(ShapeType.TRIANGLE, ColorType.RED, FillType.FILL, DrawState.UNSELECT),
@@ -14,6 +19,6 @@ class HomePresenter(private var homeView: HomeContract.View) : HomeContract.Pres
                 Shape(ShapeType.CIRCLE, ColorType.BLUE, FillType.FILL, DrawState.UNSELECT)
             )
         }
-        homeView.onShapesReceived(mShapes!!)
+        mHomeView?.onShapesReceived(mShapes!!)
     }
 }

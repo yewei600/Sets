@@ -5,7 +5,9 @@ import com.ericwei.sets.model.Shape
 class RulesContract {
 
     interface Presenter {
-        fun getShapesForRulesPage()
+        fun setView(view: View)
+
+        suspend fun getShapesForRulesPage()
     }
 
     interface View {

@@ -53,7 +53,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
             inflater, R.layout.fragment_game, container, false
         )
         mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
-        mGamePresenter = GamePresenter(this, context!!, mCoroutineScope)
+        mGamePresenter = GamePresenter(context!!)
         assignUi(binding)
 
         return binding.root
@@ -117,6 +117,7 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
+        mGamePresenter.setView(this)
         if (!mGameInProgress) {
             mCoroutineScope.launch {
                 mGamePresenter.updateGameShapes(Array(9) { it }, DrawState.REDRAW)

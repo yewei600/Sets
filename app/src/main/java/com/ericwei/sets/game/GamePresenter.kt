@@ -7,18 +7,13 @@ import com.ericwei.sets.MainActivity
 import com.ericwei.sets.R
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-class GamePresenter(
-    private var gameView: GameContract.View,
-    private val context: Context,
-    private val coroutineScope: CoroutineScope
-) :
+class GamePresenter(private val context: Context) :
     GameContract.Presenter {
 
     private val TAG = GamePresenter::class.java.simpleName
+    private var mGameView: GameContract.View? = null
     private var mScore = 0
     private var mNumSetsFound = 0
     private var mGameArray = arrayOfNulls<Shape>(9)
@@ -28,6 +23,10 @@ class GamePresenter(
         PreferenceManager.getDefaultSharedPreferences(context)
     private val ALL_SAME_SCORE = 10
     private val ALL_DIFF_SCORE = 20
+
+    override fun setView(view: GameContract.View) {
+        mGameView = view
+    }
 
     override suspend fun updateGameShapes(shapeIds: Array<Int>, drawState: DrawState) {
         when (drawState) {
@@ -61,9 +60,9 @@ class GamePresenter(
         for (id in shapeIds) {
             updateMap[id] = mGameArray[id]
         }
-        gameView.onShapesUpdateReceived(updateMap)
+        mGameView?.onShapesUpdateReceived(updateMap)
         if (drawState == DrawState.REDRAW) {
-            gameView.onNumPossibleSetsReceived(mCurrentSets.size)
+            mGameView?.onNumPossibleSetsReceived(mCurrentSets.size)
         }
     }
 
@@ -78,8 +77,8 @@ class GamePresenter(
         }
         val randomSetElement = mCurrentSets.random().random()
         updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
-        gameView.getHintShapeView(randomSetElement)
-        gameView.playSound(CLICK_ON)
+        mGameView?.getHintShapeView(randomSetElement)
+        mGameView?.playSound(CLICK_ON)
     }
 
     override suspend fun onHintShapeViewReceived(shapeView: ShapeView) {
@@ -103,27 +102,25 @@ class GamePresenter(
         if (mUserSelected.contains(shapeView)) {
             updateGameShapes(arrayOf(viewId), DrawState.UNSELECT)
             mUserSelected.remove(shapeView)
-            gameView.playSound(CLICK_OFF)
+            mGameView?.playSound(CLICK_OFF)
         } else {
             updateGameShapes(arrayOf(viewId), DrawState.SELECT)
             mUserSelected.add(shapeView)
-            gameView.playSound(CLICK_ON)
+            mGameView?.playSound(CLICK_ON)
             if (mUserSelected.size == 3) {
                 val userSet = Array(3) { 0 }
                 mUserSelected.forEachIndexed { i, shapeView ->
                     userSet[i] = shapeView.tag.toString().toInt()
                 }
-                coroutineScope.launch {
-                    delay(500)
-                    if (checkUserSelectedIsSet()) {
-                        updateGameShapes(userSet, DrawState.REDRAW)
-                        gameView.playSound(SET)
-                    } else {
-                        updateGameShapes(userSet, DrawState.UNSELECT)
-                        gameView.playSound(CLICK_OFF)
-                    }
-                    mUserSelected.clear()
+                delay(500)
+                if (checkUserSelectedIsSet()) {
+                    updateGameShapes(userSet, DrawState.REDRAW)
+                    mGameView?.playSound(SET)
+                } else {
+                    updateGameShapes(userSet, DrawState.UNSELECT)
+                    mGameView?.playSound(CLICK_OFF)
                 }
+                mUserSelected.clear()
             }
         }
     }
@@ -146,8 +143,8 @@ class GamePresenter(
             mScore += if (shapes.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
             mScore += if (colors.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
             mScore += if (fills.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE
-            gameView.onScoreUpdateReceived(mScore)
-            gameView.onNumSetsFoundReceived(++mNumSetsFound)
+            mGameView?.onScoreUpdateReceived(mScore)
+            mGameView?.onNumSetsFoundReceived(++mNumSetsFound)
         }
         return isSet
     }
@@ -177,7 +174,7 @@ class GamePresenter(
     }
 
     override suspend fun loadGameTime() {
-        gameView.startCountDownTimer(
+        mGameView?.startCountDownTimer(
             mSharedPrefs.getLong(
                 context.getString(R.string.time_remain),
                 MainActivity.FULL_TIME
