@@ -34,7 +34,7 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        mShape?.let {
+        mShape?.let { shape ->
             var coords = intArrayOf(0, 0)
             getLocationOnScreen(coords)
             val cX = (width / 2).toFloat()
@@ -42,7 +42,7 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             val radius = (width / 3).toFloat()
 
             mPath.reset()
-            when (mShape?.shapeType) {
+            when (shape.shapeType) {
                 ShapeType.CIRCLE -> getCirclePath(cX, cY, radius, mPath)
                 ShapeType.SQUARE -> getRectPath(
                     cX - radius,
@@ -54,7 +54,7 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 ShapeType.TRIANGLE -> getTrianglePath((cX - radius), (cY + radius), radius, mPath)
             }
 
-            when (mShape?.fillType) {
+            when (shape.fillType) {
                 FillType.FILL -> mPaint.style = Paint.Style.FILL
                 FillType.EMPTY -> mPaint.style = Paint.Style.STROKE
                 FillType.LINES -> {
@@ -63,7 +63,7 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
             }
             var curWidth = 5f
-            when (mShape?.drawState) {
+            when (shape.drawState) {
                 DrawState.REDRAW ->
                     curWidth = 5f
                 DrawState.UNSELECT ->
@@ -73,7 +73,7 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
             mFramePaint.strokeWidth = curWidth
 
-            mPaint.color = mShape?.colorType!!.color
+            mPaint.color = shape.colorType.color
             canvas.drawPath(mPath, mPaint)
 
             if (mDrawFrame) {
