@@ -1,8 +1,9 @@
 package com.ericwei.sets.home
 
 import com.ericwei.sets.model.*
+import javax.inject.Inject
 
-class HomePresenter : HomeContract.Presenter {
+class HomePresenter @Inject constructor() : HomeContract.Presenter {
 
     private var mHomeView: HomeContract.View? = null
     private var mShapes: Array<Shape>? = null

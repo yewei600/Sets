@@ -1,5 +1,6 @@
 package com.ericwei.sets.game
 
+import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -13,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.ericwei.sets.MainActivity
 import com.ericwei.sets.MainActivity.Companion.FULL_TIME
 import com.ericwei.sets.R
 import com.ericwei.sets.databinding.FragmentGameBinding
@@ -20,11 +22,17 @@ import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.DrawState
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
 
-    private lateinit var mGamePresenter: GameContract.Presenter
+    @Inject
+    lateinit var mGamePresenter: GameContract.Presenter
+    @Inject
+    lateinit var mCoroutineScope: CoroutineScope
     private lateinit var mGridLayout: GridLayout
     private lateinit var mShapeArray: Array<ShapeView>
     private lateinit var mScoreTv: TextView
@@ -36,13 +44,17 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
     private lateinit var mSoundBtn: ImageButton
     private lateinit var mBtnSoundPlayers: Array<MediaPlayer>
     private lateinit var mTimer: CountDownTimer
-    private lateinit var mCoroutineScope: CoroutineScope
     private var mRemainTime: Long? = null
     private var mSoundOn: Boolean = true
     private var mGameInProgress: Boolean = false
 
     enum class SOUNDS(val id: Int) {
         CLICK_ON(0), CLICK_OFF(1), SET(2)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (activity as MainActivity).mAppComponent.inject(this)
     }
 
     override fun onCreateView(
@@ -52,8 +64,6 @@ class GameFragment : Fragment(), GameContract.View, View.OnClickListener {
         val binding: FragmentGameBinding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_game, container, false
         )
-        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
-        mGamePresenter = GamePresenter(context!!)
         assignUi(binding)
 
         return binding.root

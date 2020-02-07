@@ -1,25 +1,33 @@
 package com.ericwei.sets.rules
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.ericwei.sets.MainActivity
 import com.ericwei.sets.R
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class RulesFragment : Fragment(), RulesContract.View {
 
-    private lateinit var mPresenter: RulesPresenter
+    @Inject
+    lateinit var mPresenter: RulesPresenter
+    @Inject
+    lateinit var mCoroutineScope: CoroutineScope
     private lateinit var mValidShapeArray: Array<ShapeView>
     private lateinit var mInvalidShapeArray: Array<ShapeView>
-    private lateinit var mCoroutineScope: CoroutineScope
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (activity as MainActivity).mAppComponent.inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,8 +57,6 @@ class RulesFragment : Fragment(), RulesContract.View {
             view.findViewById(R.id.ivs8),
             view.findViewById(R.id.ivs9)
         )
-        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
-        mPresenter = RulesPresenter()
         mPresenter.setView(this)
         mCoroutineScope.launch {
             mPresenter.getShapesForRulesPage()

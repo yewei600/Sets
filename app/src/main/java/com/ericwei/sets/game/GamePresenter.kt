@@ -8,8 +8,9 @@ import com.ericwei.sets.R
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.*
 import kotlinx.coroutines.delay
+import javax.inject.Inject
 
-class GamePresenter(private val context: Context) :
+class GamePresenter @Inject constructor(private val context: Context) :
     GameContract.Presenter {
 
     private val TAG = GamePresenter::class.java.simpleName

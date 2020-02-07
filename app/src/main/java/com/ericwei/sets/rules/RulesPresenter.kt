@@ -1,8 +1,9 @@
 package com.ericwei.sets.rules
 
 import com.ericwei.sets.model.*
+import javax.inject.Inject
 
-class RulesPresenter : RulesContract.Presenter {
+class RulesPresenter @Inject constructor() : RulesContract.Presenter {
 
     private var mRulesView: RulesContract.View? = null
 

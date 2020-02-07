@@ -1,6 +1,7 @@
 package com.ericwei.sets.home
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,23 +9,31 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.ericwei.sets.MainActivity
 import com.ericwei.sets.R
 import com.ericwei.sets.databinding.FragmentHomeBinding
 import com.ericwei.sets.model.Shape
 import com.ericwei.sets.model.ShapeView
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * A simple [Fragment] subclass.
  */
 class HomeFragment : Fragment(), HomeContract.View, View.OnClickListener {
 
-    private lateinit var mPresenter: HomeContract.Presenter
+    @Inject
+    lateinit var mPresenter: HomeContract.Presenter
+    @Inject
+    lateinit var mCoroutineScope: CoroutineScope
     private lateinit var mShapeArray: Array<ShapeView>
-    private lateinit var mCoroutineScope: CoroutineScope
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (activity as MainActivity).mAppComponent.inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,8 +50,6 @@ class HomeFragment : Fragment(), HomeContract.View, View.OnClickListener {
         //binding.customBtn.setOnClickListener(this)
         binding.rulesBtn.setOnClickListener(this)
 
-        mCoroutineScope = CoroutineScope(Dispatchers.Main + Job())
-        mPresenter = HomePresenter()
         mPresenter.setView(this)
         mCoroutineScope.launch {
             mPresenter.updateShapes()
