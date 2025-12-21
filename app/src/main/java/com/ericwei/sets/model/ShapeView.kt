@@ -19,24 +19,26 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     init {
         mPathMeasure.setPath(mPath, false)
 
-        mFramePaint.color = Color.LTGRAY
-        mFramePaint.isAntiAlias = true
-        mFramePaint.isDither = true
-        mFramePaint.style = Paint.Style.STROKE
-        mFramePaint.strokeJoin = Paint.Join.ROUND
-        mFramePaint.strokeCap = Paint.Cap.ROUND
-        mFramePaint.strokeWidth = mFrameWidth
+        mFramePaint.apply {
+            color = Color.LTGRAY
+            isAntiAlias = true
+            isDither = true
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = mFrameWidth
+        }
 
-        mPaint.style = Paint.Style.STROKE
-        mPaint.strokeWidth = 7f
+        mPaint.apply {
+            style = Paint.Style.STROKE
+            strokeWidth = 7f
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         mShape?.let { shape ->
-            var coords = intArrayOf(0, 0)
-            getLocationOnScreen(coords)
             val cX = (width / 2).toFloat()
             val cY = (height / 2).toFloat()
             val radius = (width / 3).toFloat()
@@ -62,22 +64,21 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     drawLinesThrough(mPath)
                 }
             }
-            var curWidth = 5f
-            when (shape.drawState) {
-                DrawState.REDRAW ->
-                    curWidth = 5f
-                DrawState.UNSELECT ->
-                    curWidth = 5f
-                DrawState.SELECT ->
-                    curWidth = 40f
+            
+            mFramePaint.strokeWidth = when (shape.drawState) {
+                DrawState.REDRAW -> 5f
+                DrawState.UNSELECT -> 5f
+                DrawState.SELECT -> 40f
             }
-            mFramePaint.strokeWidth = curWidth
 
             mPaint.color = shape.colorType.color
             canvas.drawPath(mPath, mPaint)
 
             if (mDrawFrame) {
-                canvas.drawRect(Rect(mInset, mInset, width - mInset, height - mInset), mFramePaint)
+                canvas.drawRect(
+                    Rect(mInset, mInset, width - mInset, height - mInset),
+                    mFramePaint
+                )
             }
         }
     }
@@ -88,20 +89,16 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val pointArray = arrayOfNulls<Pair<Float, Float>>(20)
         val length = pathMeasure.getLength()
-        var distance = 0f
         val speed = length / 20
+        var distance = 0f
         var counter = 0
         val aCoordinates = FloatArray(2)
 
         while (distance < length && counter < 20) {
-            // get point from the path
             pathMeasure.getPosTan(distance, aCoordinates, null)
-            pointArray[counter] = Pair(
-                aCoordinates[0],
-                aCoordinates[1]
-            )
+            pointArray[counter] = Pair(aCoordinates[0], aCoordinates[1])
             counter++
-            distance = distance + speed
+            distance += speed
         }
 
         var l = 0
@@ -109,8 +106,10 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         while (l < r) {
             val start = pointArray[l]
             val end = pointArray[r]
-            path.moveTo(start!!.first, start.second)
-            path.lineTo(end!!.first, end.second)
+            if (start != null && end != null) {
+                path.moveTo(start.first, start.second)
+                path.lineTo(end.first, end.second)
+            }
             l++
             r--
         }
@@ -125,12 +124,9 @@ class ShapeView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun getTrianglePath(x: Float, y: Float, radius: Float, path: Path) {
-        val p1 = Point(x.toInt(), y.toInt())  //bottom left point
-        val pointX = x + radius
-        val pointY = y - radius * 2
-
-        val p2 = Point(pointX.toInt(), pointY.toInt())  //top point
-        val p3 = Point((x + radius * 2).toInt(), y.toInt())  //bottom right point
+        val p1 = Point(x.toInt(), y.toInt())
+        val p2 = Point((x + radius).toInt(), (y - radius * 2).toInt())
+        val p3 = Point((x + radius * 2).toInt(), y.toInt())
 
         path.moveTo(p1.x.toFloat(), p1.y.toFloat())
         path.lineTo(p2.x.toFloat(), p2.y.toFloat())
