@@ -23,13 +23,14 @@ import com.ericwei.sets.databinding.FragmentGameBinding
 import com.ericwei.sets.game.GameFragment.SOUNDS.*
 import com.ericwei.sets.model.ShapeView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class GameFragment : Fragment() {
 
     private val viewModel: GameViewModel by viewModels()
-    
+
     private lateinit var mGridLayout: GridLayout
     private lateinit var mShapeArray: Array<ShapeView>
     private lateinit var mScoreTv: TextView
@@ -56,7 +57,7 @@ class GameFragment : Fragment() {
         )
         assignUi(binding)
         observeViewModel()
-        
+
         return binding.root
     }
 
@@ -74,22 +75,22 @@ class GameFragment : Fragment() {
             binding.s4, binding.s5, binding.s6,
             binding.s7, binding.s8, binding.s9
         )
-        
+
         mCloseBtn.setOnClickListener {
             findNavController().navigate(R.id.action_gameFragment_to_homeFragment)
         }
-        
+
         mHintBtn.setOnClickListener {
             viewModel.getHint()
         }
-        
+
         mSoundBtn.setOnClickListener {
             mSoundOn = !mSoundOn
             mSoundBtn.setImageResource(
                 if (mSoundOn) R.drawable.ic_volume_on_24px else R.drawable.ic_volume_off_24px
             )
         }
-        
+
         mShapeArray.forEachIndexed { index, shape ->
             shape.setOnClickListener {
                 viewModel.shapeClicked(index)
@@ -100,16 +101,25 @@ class GameFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    updateShapes(state.shapes)
-                    mScoreTv.text = state.score.toString()
-                    mNumSetsFoundTv.text = if (state.numSetsFound > 1) "${state.numSetsFound} sets" else "${state.numSetsFound} set"
-                    mCurSetsTv.text = "${state.numPossibleSets} sets available"
-                    updateGridClickStatus(state.isGridClickable)
-                    state.soundToPlay?.let { playSound(it) }
-                    
-                    if (mTimer == null && state.timerMillis > 0) {
-                        startCountDownTimer(state.timerMillis)
+                launch {
+                    viewModel.uiState.collect { state ->
+                        updateShapes(state.shapes)
+                        mScoreTv.text = state.score.toString()
+                        mNumSetsFoundTv.text =
+                            if (state.numSetsFound > 1) "${state.numSetsFound} sets" else "${state.numSetsFound} set"
+                        mCurSetsTv.text = "${state.numPossibleSets} sets available"
+                        updateGridClickStatus(state.isGridClickable)
+
+                        if (mTimer == null && state.timerMillis > 0) {
+                            startCountDownTimer(state.timerMillis)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.events.collect { event ->
+                        when (event) {
+                            is GameEvent.PlaySound -> playSound(event.sound)
+                        }
                     }
                 }
             }
@@ -143,10 +153,8 @@ class GameFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        mBtnSoundPlayers.forEach { it.release() }
-        mTimer?.let {
-            // In a real app we'd save the remaining time from the timer state
-            // For now, let's assume ViewModel handles persistence if needed
+        if (::mBtnSoundPlayers.isInitialized) {
+            mBtnSoundPlayers.forEach { it.release() }
         }
         mTimer?.cancel()
     }

@@ -10,10 +10,7 @@ import com.ericwei.sets.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,10 +21,12 @@ data class GameUiState(
     val numPossibleSets: Int = 0,
     val timerMillis: Long = MainActivity.FULL_TIME,
     val isGridClickable: Boolean = true,
-    val soundToPlay: GameFragment.SOUNDS? = null,
-    val hintShapeId: Int? = null,
     val gameEnded: Boolean = false
 )
+
+sealed class GameEvent {
+    data class PlaySound(val sound: GameFragment.SOUNDS) : GameEvent()
+}
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -36,6 +35,9 @@ class GameViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<GameEvent>()
+    val events = _events.asSharedFlow()
 
     private var mGameArray = arrayOfNulls<Shape>(9)
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
@@ -64,7 +66,7 @@ class GameViewModel @Inject constructor(
                             ShapeType.values().random(),
                             ColorType.values().random(),
                             FillType.values().random(),
-                            drawState
+                            DrawState.UNSELECT
                         )
                     }
                     findNumSets()
@@ -82,7 +84,7 @@ class GameViewModel @Inject constructor(
             }
         }
 
-        val updateMap = mGameArray.mapIndexed { index, shape -> index to shape }.toMap()
+        val updateMap = mGameArray.mapIndexed { index, shape -> index to shape?.copy() }.toMap()
         
         _uiState.update { currentState ->
             currentState.copy(
@@ -96,31 +98,30 @@ class GameViewModel @Inject constructor(
     fun shapeClicked(shapeId: Int) {
         viewModelScope.launch {
             if (mUserSelected.contains(shapeId)) {
-                updateGameShapes(arrayOf(shapeId), DrawState.UNSELECT)
                 mUserSelected.remove(shapeId)
-                _uiState.update { it.copy(soundToPlay = GameFragment.SOUNDS.CLICK_OFF) }
+                updateGameShapes(arrayOf(shapeId), DrawState.UNSELECT)
+                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_OFF))
             } else {
-                updateGameShapes(arrayOf(shapeId), DrawState.SELECT)
                 mUserSelected.add(shapeId)
-                _uiState.update { it.copy(soundToPlay = GameFragment.SOUNDS.CLICK_ON) }
+                updateGameShapes(arrayOf(shapeId), DrawState.SELECT)
+                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_ON))
                 
                 if (mUserSelected.size == 3) {
                     val userSetIds = mUserSelected.toTypedArray()
                     _uiState.update { it.copy(isGridClickable = false) }
                     delay(500)
                     if (checkUserSelectedIsSet()) {
+                        mUserSelected.clear()
                         updateGameShapes(userSetIds, DrawState.REDRAW)
-                        _uiState.update { it.copy(soundToPlay = GameFragment.SOUNDS.SET) }
+                        _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.SET))
                     } else {
+                        mUserSelected.clear()
                         updateGameShapes(userSetIds, DrawState.UNSELECT)
-                        _uiState.update { it.copy(soundToPlay = GameFragment.SOUNDS.CLICK_OFF) }
+                        _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_OFF))
                     }
-                    mUserSelected.clear()
                     _uiState.update { it.copy(isGridClickable = true) }
                 }
             }
-            // Reset sound after emitting
-            _uiState.update { it.copy(soundToPlay = null) }
         }
     }
 
@@ -185,10 +186,9 @@ class GameViewModel @Inject constructor(
             }
             if (mCurrentSets.isNotEmpty()) {
                 val randomSetElement = mCurrentSets.random().random()
-                updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
                 mUserSelected.add(randomSetElement)
-                _uiState.update { it.copy(soundToPlay = GameFragment.SOUNDS.CLICK_ON) }
-                _uiState.update { it.copy(soundToPlay = null) }
+                updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
+                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_ON))
             }
         }
     }
