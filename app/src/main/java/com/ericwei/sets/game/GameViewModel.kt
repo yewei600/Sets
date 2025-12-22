@@ -24,8 +24,12 @@ data class GameUiState(
     val gameEnded: Boolean = false
 )
 
+enum class GameSound(val id: Int) {
+    CLICK_ON(0), CLICK_OFF(1), SET(2)
+}
+
 sealed class GameEvent {
-    data class PlaySound(val sound: GameFragment.SOUNDS) : GameEvent()
+    data class PlaySound(val sound: GameSound) : GameEvent()
 }
 
 @HiltViewModel
@@ -100,11 +104,11 @@ class GameViewModel @Inject constructor(
             if (mUserSelected.contains(shapeId)) {
                 mUserSelected.remove(shapeId)
                 updateGameShapes(arrayOf(shapeId), DrawState.UNSELECT)
-                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_OFF))
+                _events.emit(GameEvent.PlaySound(GameSound.CLICK_OFF))
             } else {
                 mUserSelected.add(shapeId)
                 updateGameShapes(arrayOf(shapeId), DrawState.SELECT)
-                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_ON))
+                _events.emit(GameEvent.PlaySound(GameSound.CLICK_ON))
                 
                 if (mUserSelected.size == 3) {
                     val userSetIds = mUserSelected.toTypedArray()
@@ -113,11 +117,11 @@ class GameViewModel @Inject constructor(
                     if (checkUserSelectedIsSet()) {
                         mUserSelected.clear()
                         updateGameShapes(userSetIds, DrawState.REDRAW)
-                        _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.SET))
+                        _events.emit(GameEvent.PlaySound(GameSound.SET))
                     } else {
                         mUserSelected.clear()
                         updateGameShapes(userSetIds, DrawState.UNSELECT)
-                        _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_OFF))
+                        _events.emit(GameEvent.PlaySound(GameSound.CLICK_OFF))
                     }
                     _uiState.update { it.copy(isGridClickable = true) }
                 }
@@ -188,7 +192,7 @@ class GameViewModel @Inject constructor(
                 val randomSetElement = mCurrentSets.random().random()
                 mUserSelected.add(randomSetElement)
                 updateGameShapes(arrayOf(randomSetElement), DrawState.SELECT)
-                _events.emit(GameEvent.PlaySound(GameFragment.SOUNDS.CLICK_ON))
+                _events.emit(GameEvent.PlaySound(GameSound.CLICK_ON))
             }
         }
     }
