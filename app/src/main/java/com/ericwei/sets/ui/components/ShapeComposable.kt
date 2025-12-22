@@ -10,11 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 import com.ericwei.sets.model.DrawState
 import com.ericwei.sets.model.FillType
@@ -36,13 +36,10 @@ fun ShapeComposable(
                 if (drawFrame) {
                     Modifier.border(
                         width = when (shape?.drawState) {
-                            DrawState.SELECT -> 8.dp
-                            else -> 1.dp
+                            DrawState.SELECT -> 10.dp
+                            else -> 1.5.dp
                         },
-                        color = when (shape?.drawState) {
-                            DrawState.SELECT -> Color.LightGray
-                            else -> Color.Transparent
-                        }
+                        color = Color.LightGray
                     )
                 } else Modifier
             )
@@ -60,9 +57,11 @@ fun ShapeComposable(
                     ShapeType.CIRCLE -> {
                         path.addOval(Rect(cX - radius, cY - radius, cX + radius, cY + radius))
                     }
+
                     ShapeType.SQUARE -> {
                         path.addRect(Rect(cX - radius, cY - radius, cX + radius, cY + radius))
                     }
+
                     ShapeType.TRIANGLE -> {
                         path.moveTo(cX - radius, cY + radius)
                         path.lineTo(cX, cY - radius)
@@ -71,16 +70,20 @@ fun ShapeComposable(
                     }
                 }
 
+                val strokeWidth = 3.dp.toPx()
+
                 when (shape.fillType) {
                     FillType.FILL -> {
                         drawPath(path, color = color)
                     }
+
                     FillType.EMPTY -> {
-                        drawPath(path, color = color, style = Stroke(width = 4.dp.toPx()))
+                        drawPath(path, color = color, style = Stroke(width = strokeWidth))
                     }
+
                     FillType.LINES -> {
-                        drawPath(path, color = color, style = Stroke(width = 4.dp.toPx()))
-                        drawLinesInPath(path, color)
+                        drawPath(path, color = color, style = Stroke(width = strokeWidth))
+                        drawHatchedLines(path, color)
                     }
                 }
             }
@@ -88,16 +91,18 @@ fun ShapeComposable(
     }
 }
 
-private fun DrawScope.drawLinesInPath(path: Path, color: Color) {
-    // Simplified lines drawing for Compose
-    // In a production app, we'd use a more robust path clipping approach
-    val step = 10f
-    for (i in 0..size.width.toInt() step step.toInt()) {
-        drawLine(
-            color = color,
-            start = Offset(i.toFloat(), 0f),
-            end = Offset(i.toFloat(), size.height),
-            strokeWidth = 1f
-        )
+private fun DrawScope.drawHatchedLines(path: Path, color: Color) {
+    clipPath(path) {
+        val step = 8.dp.toPx()
+        // We use a range that covers the entire rotated area to ensure full coverage
+        val range = (size.width + size.height).toInt()
+        for (i in -range..range step step.toInt()) {
+            drawLine(
+                color = color,
+                start = Offset(i.toFloat(), 0f),
+                end = Offset(i.toFloat() - size.height, size.height),
+                strokeWidth = 2.dp.toPx()
+            )
+        }
     }
 }
