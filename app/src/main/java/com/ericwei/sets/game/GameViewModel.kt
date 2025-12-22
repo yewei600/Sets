@@ -9,6 +9,7 @@ import com.ericwei.sets.R
 import com.ericwei.sets.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -52,11 +53,39 @@ class GameViewModel @Inject constructor(
 
     private val ALL_SAME_SCORE = 10
     private val ALL_DIFF_SCORE = 20
+    
+    private var timerJob: Job? = null
 
     fun initGame() {
         viewModelScope.launch {
+            // Reset state for new game
+            _uiState.update { GameUiState() }
+            mUserSelected.clear()
+            mGameArray = arrayOfNulls<Shape>(9)
+            
             updateGameShapes((0..8).toList().toTypedArray(), DrawState.REDRAW)
             loadGameTime()
+            
+            // If loaded time is 0 or less, reset to FULL_TIME
+            if (_uiState.value.timerMillis <= 0) {
+                _uiState.update { it.copy(timerMillis = MainActivity.FULL_TIME) }
+            }
+            
+            startTimer()
+        }
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (uiState.value.timerMillis > 0) {
+                delay(1000)
+                _uiState.update { currentState ->
+                    val newTime = (currentState.timerMillis - 1000).coerceAtLeast(0)
+                    currentState.copy(timerMillis = newTime)
+                }
+            }
+            _uiState.update { it.copy(gameEnded = true, isGridClickable = false) }
         }
     }
 
@@ -67,9 +96,9 @@ class GameViewModel @Inject constructor(
                     mCurrentSets.clear()
                     for (i in shapeIds) {
                         mGameArray[i] = Shape(
-                            ShapeType.values().random(),
-                            ColorType.values().random(),
-                            FillType.values().random(),
+                            ShapeType.entries.random(),
+                            ColorType.entries.random(),
+                            FillType.entries.random(),
                             DrawState.UNSELECT
                         )
                     }
@@ -94,12 +123,14 @@ class GameViewModel @Inject constructor(
             currentState.copy(
                 shapes = updateMap,
                 numPossibleSets = if (drawState == DrawState.REDRAW) mCurrentSets.size else currentState.numPossibleSets,
-                isGridClickable = mUserSelected.size < 3
+                isGridClickable = mUserSelected.size < 3 && !currentState.gameEnded
             )
         }
     }
 
     fun shapeClicked(shapeId: Int) {
+        if (uiState.value.gameEnded) return
+        
         viewModelScope.launch {
             if (mUserSelected.contains(shapeId)) {
                 mUserSelected.remove(shapeId)
@@ -123,7 +154,9 @@ class GameViewModel @Inject constructor(
                         updateGameShapes(userSetIds, DrawState.UNSELECT)
                         _events.emit(GameEvent.PlaySound(GameSound.CLICK_OFF))
                     }
-                    _uiState.update { it.copy(isGridClickable = true) }
+                    if (!uiState.value.gameEnded) {
+                        _uiState.update { it.copy(isGridClickable = true) }
+                    }
                 }
             }
         }
@@ -182,6 +215,8 @@ class GameViewModel @Inject constructor(
     }
 
     fun getHint() {
+        if (uiState.value.gameEnded) return
+        
         viewModelScope.launch {
             if (mUserSelected.isNotEmpty()) {
                 val clearSelected = mUserSelected.toTypedArray()
@@ -197,7 +232,8 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    fun saveTimeRemaining(remainTime: Long) {
+    fun saveTimeRemaining() {
+        val remainTime = uiState.value.timerMillis
         mSharedPrefs.edit().putLong(context.getString(R.string.time_remain), remainTime).apply()
     }
 
@@ -207,5 +243,10 @@ class GameViewModel @Inject constructor(
             MainActivity.FULL_TIME
         )
         _uiState.update { it.copy(timerMillis = time) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timerJob?.cancel()
     }
 }
