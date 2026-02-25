@@ -2,11 +2,27 @@ package com.ericwei.sets.game
 
 import android.media.MediaPlayer
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -25,6 +41,7 @@ fun GameScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var soundOn by remember { mutableStateOf(true) }
 
     val players = remember {
         mapOf(
@@ -36,8 +53,11 @@ fun GameScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initGame()
+    }
+
+    LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
-            if (event is GameEvent.PlaySound) {
+            if (soundOn && event is GameEvent.PlaySound) {
                 players[event.sound]?.apply {
                     seekTo(0)
                     start()
@@ -46,57 +66,51 @@ fun GameScreen(
         }
     }
 
+    LaunchedEffect(uiState.gameEnded) {
+        if (uiState.gameEnded) {
+            onGameOver(uiState.score.toString())
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
+            viewModel.saveTimeRemaining()
             players.values.forEach { it.release() }
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Top Buttons (Close, Hint, Sound)
-        Row(
+        TextMonospace(
+            text = uiState.score.toString(),
+            fontSize = 90.sp,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            IconButton(onClick = onBackClicked) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_close_24px),
-                    contentDescription = "Close",
-                    modifier = Modifier.size(50.dp)
-                )
-            }
-        }
+                .align(Alignment.TopCenter)
+                .padding(top = 24.dp)
+        )
+
+        LegacyIconButton(
+            painterRes = R.drawable.ic_close_24px,
+            contentDescription = "Close",
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick = onBackClicked
+        )
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = (-18).dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Score
-            Text(
-                text = "${uiState.score}",
-                fontSize = 90.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                modifier = Modifier.padding(top = 24.dp)
-            )
-
-            Spacer(modifier = Modifier.weight(0.1f))
-
-            // Timer and Found Count
             Row(
                 modifier = Modifier
-                    .width(360.dp) // Approximate width of 3x100dp + margins
-                    .padding(horizontal = 10.dp, vertical = 12.dp),
+                    .width(360.dp)
+                    .padding(start = 10.dp, end = 10.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${uiState.numSetsFound} set",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif
+                TextMonospace(
+                    text = if (uiState.numSetsFound == 1) "1 set" else "${uiState.numSetsFound} sets",
+                    fontSize = 30.sp
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -105,69 +119,102 @@ fun GameScreen(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 8.dp)
                     )
-                    Text(
-                        text = String.format("%d:%02d", (uiState.timerMillis / 1000) / 60, (uiState.timerMillis / 1000) % 60),
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Serif
+                    TextMonospace(
+                        text = String.format(
+                            "%d:%02d",
+                            (uiState.timerMillis / 1000) / 60,
+                            (uiState.timerMillis / 1000) % 60
+                        ),
+                        fontSize = 30.sp
                     )
                 }
             }
 
-            // Grid
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                for (row in 0 until 3) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
-                        for (col in 0 until 3) {
+            Column {
+                repeat(3) { row ->
+                    Row {
+                        repeat(3) { col ->
                             val index = row * 3 + col
                             ShapeComposable(
                                 shape = uiState.shapes[index],
                                 modifier = Modifier
-                                    .size(120.dp) // 100dp + 10dp margin on each side
+                                    .size(120.dp)
                                     .padding(10.dp),
-                                onClick = { if (uiState.isGridClickable) viewModel.shapeClicked(index) }
+                                onClick = {
+                                    if (uiState.isGridClickable) {
+                                        viewModel.shapeClicked(index)
+                                    }
+                                }
                             )
                         }
                     }
                 }
             }
 
-            // Available Sets
-            Text(
+            TextMonospace(
                 text = "${uiState.numPossibleSets} sets available",
                 fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
                 modifier = Modifier.padding(top = 23.dp)
             )
-
-            Spacer(modifier = Modifier.weight(0.32f))
         }
 
-        // Bottom Buttons
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(end = 0.dp, bottom = 0.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            IconButton(onClick = { viewModel.getHint() }) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_help_outline_24px),
-                    contentDescription = "Hint",
-                    modifier = Modifier.size(50.dp)
-                )
-            }
-            IconButton(onClick = { /* Toggle Sound */ }) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_volume_on_24px),
-                    contentDescription = "Sound",
-                    modifier = Modifier.size(50.dp)
-                )
-            }
+            LegacyIconButton(
+                painterRes = R.drawable.ic_help_outline_24px,
+                contentDescription = "Hint",
+                onClick = { viewModel.getHint() }
+            )
+            LegacyIconButton(
+                painterRes = if (soundOn) R.drawable.ic_volume_on_24px else R.drawable.ic_volume_off_24px,
+                contentDescription = if (soundOn) "Sound On" else "Sound Off",
+                onClick = { soundOn = !soundOn }
+            )
         }
+    }
+}
+
+@Composable
+private fun TextMonospace(
+    text: String,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.material3.Text(
+        text = text,
+        modifier = modifier,
+        fontSize = fontSize,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        color = Color.Black
+    )
+}
+
+@Composable
+private fun LegacyIconButton(
+    painterRes: Int,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .size(50.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(painterRes),
+            contentDescription = contentDescription,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
