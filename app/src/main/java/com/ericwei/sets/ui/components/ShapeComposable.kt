@@ -98,7 +98,7 @@ fun ShapeComposable(
 
 private fun DrawScope.drawHatchedLines(path: Path, color: Color) {
     clipPath(path) {
-        val step = 10f
+        val step = 16f
         // We use a range that covers the entire rotated area to ensure full coverage
         val range = (size.width + size.height).toInt()
         for (i in -range..range step step.toInt().coerceAtLeast(1)) {

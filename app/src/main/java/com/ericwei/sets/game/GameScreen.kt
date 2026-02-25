@@ -85,7 +85,7 @@ fun GameScreen(
             fontSize = 90.sp,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 24.dp)
+                .padding(top = 40.dp)
         )
 
         LegacyIconButton(
@@ -98,7 +98,7 @@ fun GameScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
-                .offset(y = (-18).dp),
+                .offset(y = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
