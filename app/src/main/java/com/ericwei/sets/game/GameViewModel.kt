@@ -1,19 +1,23 @@
 package com.ericwei.sets.game
 
+import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.lifecycle.ViewModel
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ericwei.sets.MainActivity
-import com.ericwei.sets.R
 import com.ericwei.sets.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private val Context.dataStore by preferencesDataStore(name = "sets_prefs")
+private val TIME_REMAIN_KEY = longPreferencesKey("time_remain")
 
 data class GameUiState(
     val shapes: Map<Int, Shape?> = emptyMap(),
@@ -35,8 +39,8 @@ sealed class GameEvent {
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -47,13 +51,11 @@ class GameViewModel @Inject constructor(
     private var mGameArray = arrayOfNulls<Shape>(9)
     private var mCurrentSets: ArrayList<Array<Int>> = arrayListOf()
     private val mUserSelected: MutableSet<Int> = mutableSetOf()
-    
-    private val mSharedPrefs: SharedPreferences =
-        context.getSharedPreferences("sets_prefs", Context.MODE_PRIVATE)
+    private val appContext = getApplication<Application>().applicationContext
 
     private val ALL_SAME_SCORE = 10
     private val ALL_DIFF_SCORE = 20
-    
+
     private var timerJob: Job? = null
 
     fun initGame() {
@@ -62,15 +64,15 @@ class GameViewModel @Inject constructor(
             _uiState.update { GameUiState() }
             mUserSelected.clear()
             mGameArray = arrayOfNulls<Shape>(9)
-            
+
             updateGameShapes((0..8).toList().toTypedArray(), DrawState.REDRAW)
             loadGameTime()
-            
+
             // If loaded time is 0 or less, reset to FULL_TIME
             if (_uiState.value.timerMillis <= 0) {
                 _uiState.update { it.copy(timerMillis = MainActivity.FULL_TIME) }
             }
-            
+
             startTimer()
         }
     }
@@ -105,11 +107,13 @@ class GameViewModel @Inject constructor(
                     findNumSets()
                 } while (mCurrentSets.size < 2 || mCurrentSets.size > 4)
             }
+
             DrawState.SELECT -> {
                 for (i in shapeIds) {
                     mGameArray[i]?.drawState = DrawState.SELECT
                 }
             }
+
             DrawState.UNSELECT -> {
                 for (i in shapeIds) {
                     mGameArray[i]?.drawState = DrawState.UNSELECT
@@ -118,7 +122,7 @@ class GameViewModel @Inject constructor(
         }
 
         val updateMap = mGameArray.mapIndexed { index, shape -> index to shape?.copy() }.toMap()
-        
+
         _uiState.update { currentState ->
             currentState.copy(
                 shapes = updateMap,
@@ -130,7 +134,7 @@ class GameViewModel @Inject constructor(
 
     fun shapeClicked(shapeId: Int) {
         if (uiState.value.gameEnded) return
-        
+
         viewModelScope.launch {
             if (mUserSelected.contains(shapeId)) {
                 mUserSelected.remove(shapeId)
@@ -140,7 +144,7 @@ class GameViewModel @Inject constructor(
                 mUserSelected.add(shapeId)
                 updateGameShapes(arrayOf(shapeId), DrawState.SELECT)
                 _events.emit(GameEvent.PlaySound(GameSound.CLICK_ON))
-                
+
                 if (mUserSelected.size == 3) {
                     val userSetIds = mUserSelected.toTypedArray()
                     _uiState.update { it.copy(isGridClickable = false) }
@@ -177,11 +181,13 @@ class GameViewModel @Inject constructor(
             val scoreGain = (if (shapes.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE) +
                     (if (colors.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE) +
                     (if (fills.size == 1) ALL_SAME_SCORE else ALL_DIFF_SCORE)
-            
-            _uiState.update { it.copy(
-                score = it.score + scoreGain,
-                numSetsFound = it.numSetsFound + 1
-            )}
+
+            _uiState.update {
+                it.copy(
+                    score = it.score + scoreGain,
+                    numSetsFound = it.numSetsFound + 1
+                )
+            }
         }
         return isSet
     }
@@ -216,7 +222,7 @@ class GameViewModel @Inject constructor(
 
     fun getHint() {
         if (uiState.value.gameEnded) return
-        
+
         viewModelScope.launch {
             if (mUserSelected.isNotEmpty()) {
                 val clearSelected = mUserSelected.toTypedArray()
@@ -234,14 +240,15 @@ class GameViewModel @Inject constructor(
 
     fun saveTimeRemaining() {
         val remainTime = uiState.value.timerMillis
-        mSharedPrefs.edit().putLong(context.getString(R.string.time_remain), remainTime).apply()
+        viewModelScope.launch {
+            appContext.dataStore.edit { prefs ->
+                prefs[TIME_REMAIN_KEY] = remainTime
+            }
+        }
     }
 
-    private fun loadGameTime() {
-        val time = mSharedPrefs.getLong(
-            context.getString(R.string.time_remain),
-            MainActivity.FULL_TIME
-        )
+    private suspend fun loadGameTime() {
+        val time = appContext.dataStore.data.first()[TIME_REMAIN_KEY] ?: MainActivity.FULL_TIME
         _uiState.update { it.copy(timerMillis = time) }
     }
 
